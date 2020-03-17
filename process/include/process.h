@@ -19,9 +19,25 @@ public:
 
     bool isReadable() const;
 
+    bool isWritable() const;
+
     void closeStdin();
 
+    void closeStdout();
+
     void close();
+
+private:
+    enum ProcessStates {
+        IS_CLOSED,
+        IS_OPENED
+    };
+
+    int proc_in;
+    int proc_out;
+
+    ProcessStates proc_in_state;
+    ProcessStates proc_out_state;
 };
 
 #endif //HOMEWORK_PROCESS_H
