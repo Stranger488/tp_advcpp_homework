@@ -1,25 +1,36 @@
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/wait.h>
 #include <stdexcept>
 #include <iostream>
+#include <vector>
 
 #include "process.h"
 
 int main() {
     try {
-        const std::string path = "../tests/test_hw1";
+        const std::string path = "/bin/cat";
         Process process(path);
 
-        process.write(path.c_str(), path.length());
+        std::string temp_string("initial");
+        while (!temp_string.empty()) {
+            temp_string.clear();
+            std::cin >> temp_string;
 
-        char buf[path.length()];
+            process.writeExact(temp_string.c_str(), temp_string.size());
 
-        void *buf_ptr = buf;
-        process.read(buf, path.length());
-        buf[path.length() - 1] = '\n';
+            std::vector<char> buf(temp_string.size());
+            process.readExact(buf.data(), buf.size());
 
-        std::cout << buf << std::endl;
+            std::cout << buf.data() << std::endl;
+
+
+            const int N = 1e5;
+            std::vector<char> buf2(N);
+            for (char &i : buf2) {
+                i = 'a';
+            }
+            process.write(buf2.data(), buf2.size());
+            process.read(buf2.data(), buf2.size());
+            std::cout << buf2.data() << std::endl;
+        }
     } catch (std::runtime_error &err) {
         std::cout << err.what() << std::endl;
         return -1;

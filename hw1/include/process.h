@@ -3,6 +3,11 @@
 
 #include <string>
 
+enum class ProcessStates {
+    IS_CLOSED,
+    IS_OPENED
+};
+
 class Process {
 public:
     explicit Process(const std::string &path);
@@ -14,25 +19,17 @@ public:
     void writeExact(const void *data, size_t len);
 
     size_t read(void *data, size_t len);
-
     void readExact(void *data, size_t len);
 
     bool isReadable() const;
-
     bool isWritable() const;
 
     void closeStdin();
-
     void closeStdout();
 
     void close();
 
 private:
-    enum ProcessStates {
-        IS_CLOSED,
-        IS_OPENED
-    };
-
     int proc_in;
     int proc_out;
 

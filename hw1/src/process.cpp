@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <iostream>
 
 #include "process.h"
 
@@ -50,7 +51,7 @@ Process::Process(const std::string &path) {
                 throw std::runtime_error(std::strerror(errno));
             }
 
-            exit(EXIT_SUCCESS);
+            break;
         }
         default: { // parent
             ::close(child_in);
@@ -59,7 +60,8 @@ Process::Process(const std::string &path) {
             proc_in = parent_in;
             proc_out = parent_out;
 
-            proc_in_state = IS_OPENED;
+            proc_in_state = ProcessStates::IS_OPENED;
+            proc_out_state = ProcessStates::IS_OPENED;
 
             break;
         }
@@ -70,10 +72,15 @@ Process::~Process() {
     close();
 
     int status = 0;
-    ::wait(&status);
+    ::waitpid(proc_pid, &status, 0);
 }
 
 size_t Process::write(const void *data, size_t len) {
+    if (!isWritable()) {
+        std::cerr << "Process is not writable." << std::endl;
+        return 0;
+    }
+
     ssize_t bytes = ::write(proc_out, data, len);
 
     if (bytes < 0) {
@@ -84,12 +91,31 @@ size_t Process::write(const void *data, size_t len) {
 }
 
 void Process::writeExact(const void *data, size_t len) {
+    if (!isWritable()) {
+        std::cerr << "Process is not writable." << std::endl;
+        return;
+    }
 
+    std::size_t sent = 0;
+    std::size_t last_sent = 0;
+    while (sent != len) {
+        sent += write(static_cast<const char *>(data) + sent, len - sent);
+
+        if (sent == last_sent) {
+            throw std::runtime_error(std::to_string(sent) + " bytes were sent.");
+        }
+
+        last_sent = sent;
+    }
 }
 
 size_t Process::read(void *data, size_t len) {
-    ssize_t bytes = ::read(proc_in, data, len);
+    if (!isReadable()) {
+        std::cerr << "Process is not readable." << std::endl;
+        return 0;
+    }
 
+    ssize_t bytes = ::read(proc_in, data, len);
     if (bytes < 0) {
         throw std::runtime_error(std::strerror(errno));
     }
@@ -98,25 +124,40 @@ size_t Process::read(void *data, size_t len) {
 }
 
 void Process::readExact(void *data, size_t len) {
+    if (!isReadable()) {
+        std::cerr << "Process is not readable." << std::endl;
+        return;
+    }
 
+    std::size_t received = 0;
+    std::size_t last_received = 0;
+    while (received != len) {
+        received += read(static_cast<char *>(data) + received, len - received);
+
+        if (received == last_received) {
+            throw std::runtime_error(std::to_string(received) + " bytes were received.");
+        }
+
+        last_received = received;
+    }
 }
 
 bool Process::isReadable() const {
-    return proc_in_state;
+    return proc_in_state == ProcessStates::IS_OPENED;
 }
 
 bool Process::isWritable() const {
-    return proc_out_state;
+    return proc_out_state == ProcessStates::IS_OPENED;
 }
 
 void Process::closeStdin() {
     ::close(proc_in);
-    proc_in_state = IS_CLOSED;
+    proc_in_state = ProcessStates::IS_CLOSED;
 }
 
 void Process::closeStdout() {
     ::close(proc_out);
-    proc_out_state = IS_CLOSED;
+    proc_out_state = ProcessStates::IS_CLOSED;
 }
 
 void Process::close() {
