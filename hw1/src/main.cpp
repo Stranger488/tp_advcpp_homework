@@ -7,11 +7,10 @@
 int main() {
     try {
         const std::string path = "/bin/cat";
-//        const std::string path = "test_hw1";
         Process process(path);
 
-        std::string temp_string("initial");
-        while (!temp_string.empty() && process.isWorking()) {
+        std::string temp_string;
+        while ((std::cin >> temp_string) && process.isWorking()) {
             std::vector<char> buf(temp_string.size());
 
             process.writeExact(temp_string.c_str(), temp_string.size());
@@ -20,8 +19,9 @@ int main() {
             std::cout << buf.data() << std::endl;
 
             temp_string.clear();
-            std::cin >> temp_string;
         }
+
+        process.closeStdout();
     } catch (std::runtime_error &err) {
         std::cout << err.what() << std::endl;
         return -1;
