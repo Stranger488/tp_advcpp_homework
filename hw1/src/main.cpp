@@ -19,6 +19,15 @@ int main() {
             std::cout << buf.data() << std::endl;
 
             temp_string.clear();
+
+
+            std::string big_string(1e5, 'a');
+            std::vector<char> big_buf(big_string.size());
+
+            process.write(big_string.c_str(), big_string.size());
+            process.read(big_buf.data(), big_buf.size());
+
+            std::cout << big_buf.data() << std::endl;
         }
 
         process.closeStdout();

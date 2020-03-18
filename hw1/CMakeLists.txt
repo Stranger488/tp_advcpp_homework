@@ -10,5 +10,3 @@ target_include_directories(process PUBLIC include)
 
 add_executable(hw1 src/main.cpp)
 target_link_libraries(hw1 process)
-
-add_executable(test_hw1 tests/test.cpp)
