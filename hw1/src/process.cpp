@@ -1,6 +1,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <unistd.h>
+#include <sys/wait.h>
 
 #include "process.h"
 
@@ -24,7 +25,7 @@ Process::Process(const std::string &path) {
     int child_in = from_parent_to_child[0];
     int child_out = from_child_to_parent[1];
 
-    int proc_pid = fork();
+    proc_pid = fork();
     switch (proc_pid) {
         case -1:
             throw std::runtime_error(std::strerror(errno));
@@ -58,7 +59,7 @@ Process::Process(const std::string &path) {
             proc_in = parent_in;
             proc_out = parent_out;
 
-            proc_in_state = IS_CLOSED;
+            proc_in_state = IS_OPENED;
 
             break;
         }
@@ -66,7 +67,10 @@ Process::Process(const std::string &path) {
 }
 
 Process::~Process() {
+    close();
 
+    int status = 0;
+    ::wait(&status);
 }
 
 size_t Process::write(const void *data, size_t len) {

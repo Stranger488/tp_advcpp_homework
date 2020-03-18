@@ -38,6 +38,8 @@ private:
 
     ProcessStates proc_in_state;
     ProcessStates proc_out_state;
+
+    pid_t proc_pid;
 };
 
 #endif //HOMEWORK_PROCESS_H
