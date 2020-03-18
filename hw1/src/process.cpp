@@ -27,52 +27,47 @@ Process::Process(const std::string &path) {
     int child_out = from_child_to_parent[1];
 
     proc_pid = fork();
-    switch (proc_pid) {
-        case -1:
+    if (proc_pid == -1) {
+        throw std::runtime_error(std::strerror(errno));
+    } else if (proc_pid == 0) {  // child
+        ::close(parent_in);
+        ::close(parent_out);
+
+        if (dup2(child_in, STDIN_FILENO) < 0 ||
+            dup2(child_out, STDOUT_FILENO) < 0) {
             throw std::runtime_error(std::strerror(errno));
-        case 0: {  // child
-            ::close(parent_in);
-            ::close(parent_out);
-
-            if (dup2(child_in, STDIN_FILENO) < 0 ||
-                dup2(child_out, STDOUT_FILENO) < 0) {
-                throw std::runtime_error(std::strerror(errno));
-            }
-
-            ::close(child_in);
-            ::close(child_out);
-
-            char *args[2] = {
-                    const_cast<char *>(path.c_str()),
-                    nullptr
-            };
-
-            if (execv(args[0], args) < 0) {
-                throw std::runtime_error(std::strerror(errno));
-            }
-
-            break;
         }
-        default: { // parent
-            ::close(child_in);
-            ::close(child_out);
 
-            proc_in = parent_in;
-            proc_out = parent_out;
+        ::close(child_in);
+        ::close(child_out);
 
-            proc_in_state = ProcessStates::IS_OPENED;
-            proc_out_state = ProcessStates::IS_OPENED;
+        char *args[2] = {
+                const_cast<char *>(path.c_str()),
+                nullptr
+        };
 
-            break;
+        if (execv(args[0], args) < 0) {
+            throw std::runtime_error(std::strerror(errno));
         }
+
+        exit(EXIT_SUCCESS);
+    } else { // parent
+        ::close(child_in);
+        ::close(child_out);
+
+        proc_in = parent_in;
+        proc_out = parent_out;
+
+        proc_in_state = ProcessStates::IS_OPENED;
+        proc_out_state = ProcessStates::IS_OPENED;
     }
 }
 
 Process::~Process() {
-    close();
-
     int status = 0;
     ::waitpid(proc_pid, &status, 0);
+
+    close();
 }
 
 size_t Process::write(const void *data, size_t len) {
@@ -163,4 +158,17 @@ void Process::closeStdout() {
 void Process::close() {
     closeStdin();
     closeStdout();
+}
+
+bool Process::isWorking() const {
+    int status = 0;
+
+    int res = waitpid(proc_pid, &status, WNOHANG);
+    if (res == 0) { // child process is not finished
+        return true;
+    } else if (res < 0) {
+        throw std::runtime_error(std::strerror(errno));
+    }
+
+    return false;
 }
