@@ -29,8 +29,6 @@ int main() {
 
             std::cout << big_buf.data() << std::endl;
         }
-
-        process.closeStdout();
     } catch (std::runtime_error &err) {
         std::cout << err.what() << std::endl;
         return -1;

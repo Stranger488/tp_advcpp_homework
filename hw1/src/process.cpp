@@ -64,10 +64,10 @@ Process::Process(const std::string &path) {
 }
 
 Process::~Process() {
+    close();
+
     int status = 0;
     ::waitpid(proc_pid, &status, 0);
-
-    close();
 }
 
 size_t Process::write(const void *data, size_t len) {
