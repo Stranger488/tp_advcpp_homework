@@ -10,6 +10,7 @@ int main() {
         Process process(path);
 
         std::string temp_string;
+        const size_t N = 1e5; // big_string size
         while ((std::cin >> temp_string) && process.isWorking()) {
             std::vector<char> buf(temp_string.size());
 
@@ -21,11 +22,11 @@ int main() {
             temp_string.clear();
 
 
-            std::string big_string(1e5, 'a');
-            std::vector<char> big_buf(big_string.size());
+            std::string big_string(N, 'a');
+            std::string big_buf(N, '\0');
 
-            process.write(big_string.c_str(), big_string.size());
-            process.read(big_buf.data(), big_buf.size());
+            process.write(big_string.c_str(), N);
+            process.read(big_buf.data(), N);
 
             std::cout << big_buf.data() << std::endl;
         }

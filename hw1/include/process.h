@@ -23,7 +23,6 @@ public:
     bool isWritable() const;
 
     void closeStdin();
-    void closeStdout();
 
     void close();
 

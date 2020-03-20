@@ -33,8 +33,10 @@ Process::Process(const std::string &path) {
         ::close(parent_in);
         ::close(parent_out);
 
-        if (dup2(child_in, STDIN_FILENO) < 0 ||
-            dup2(child_out, STDOUT_FILENO) < 0) {
+        if (dup2(child_in, STDIN_FILENO) < 0) {
+            throw std::runtime_error(std::strerror(errno));
+        }
+        if (dup2(child_out, STDOUT_FILENO) < 0) {
             throw std::runtime_error(std::strerror(errno));
         }
 
@@ -49,8 +51,6 @@ Process::Process(const std::string &path) {
         if (execv(args[0], args) < 0) {
             throw std::runtime_error(std::strerror(errno));
         }
-
-        exit(EXIT_SUCCESS);
     } else { // parent
         ::close(child_in);
         ::close(child_out);
@@ -66,16 +66,13 @@ Process::Process(const std::string &path) {
 Process::~Process() {
     close();
 
-    kill(proc_pid, SIGTERM);
-
     int status = 0;
     ::waitpid(proc_pid, &status, 0);
 }
 
 size_t Process::write(const void *data, size_t len) {
     if (!isWritable()) {
-        std::cerr << "Process is not writable." << std::endl;
-        return 0;
+        throw std::runtime_error("Process is not writable. 0 bytes were sent.");
     }
 
     ssize_t bytes = ::write(proc_out, data, len);
@@ -89,8 +86,7 @@ size_t Process::write(const void *data, size_t len) {
 
 void Process::writeExact(const void *data, size_t len) {
     if (!isWritable()) {
-        std::cerr << "Process is not writable." << std::endl;
-        return;
+        throw std::runtime_error("Process is not writable. 0 bytes were sent.");
     }
 
     std::size_t sent = 0;
@@ -108,8 +104,7 @@ void Process::writeExact(const void *data, size_t len) {
 
 size_t Process::read(void *data, size_t len) {
     if (!isReadable()) {
-        std::cerr << "Process is not readable." << std::endl;
-        return 0;
+        throw std::runtime_error("Process is not readable. 0 bytes were received.");
     }
 
     ssize_t bytes = ::read(proc_in, data, len);
@@ -122,8 +117,7 @@ size_t Process::read(void *data, size_t len) {
 
 void Process::readExact(void *data, size_t len) {
     if (!isReadable()) {
-        std::cerr << "Process is not readable." << std::endl;
-        return;
+        throw std::runtime_error("Process is not readable. 0 bytes were received.");
     }
 
     std::size_t received = 0;
@@ -152,14 +146,9 @@ void Process::closeStdin() {
     proc_in_state = ProcessStates::IS_CLOSED;
 }
 
-void Process::closeStdout() {
-    ::close(proc_out);
-    proc_out_state = ProcessStates::IS_CLOSED;
-}
-
 void Process::close() {
     closeStdin();
-    closeStdout();
+    kill(proc_pid, SIGTERM);
 }
 
 bool Process::isWorking() const {
