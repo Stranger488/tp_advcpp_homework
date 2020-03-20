@@ -66,6 +66,8 @@ Process::Process(const std::string &path) {
 Process::~Process() {
     close();
 
+    kill(proc_pid, SIGTERM);
+
     int status = 0;
     ::waitpid(proc_pid, &status, 0);
 }
