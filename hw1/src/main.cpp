@@ -10,9 +10,9 @@ int main() {
         Process process(path);
 
         std::string temp_string;
-        const size_t N = 1e5; // big_string size
+        const size_t N = 100000; // big_string size
         while ((std::cin >> temp_string) && process.isWorking()) {
-            std::vector<char> buf(temp_string.size());
+            std::string buf(temp_string.size(), '\0');
 
             process.writeExact(temp_string.c_str(), temp_string.size());
             process.readExact(buf.data(), buf.size());

@@ -28,6 +28,12 @@ Process::Process(const std::string &path) {
 
     proc_pid = fork();
     if (proc_pid == -1) {
+        ::close(parent_in);
+        ::close(parent_out);
+
+        ::close(child_in);
+        ::close(child_out);
+
         throw std::runtime_error(std::strerror(errno));
     } else if (proc_pid == 0) {  // child
         ::close(parent_in);
@@ -65,9 +71,6 @@ Process::Process(const std::string &path) {
 
 Process::~Process() {
     close();
-
-    int status = 0;
-    ::waitpid(proc_pid, &status, 0);
 }
 
 size_t Process::write(const void *data, size_t len) {
@@ -148,7 +151,11 @@ void Process::closeStdin() {
 
 void Process::close() {
     closeStdin();
+
     kill(proc_pid, SIGTERM);
+
+    int status = 0;
+    ::waitpid(proc_pid, &status, 0);
 }
 
 bool Process::isWorking() const {
