@@ -40,9 +40,15 @@ Process::Process(const std::string &path) {
         ::close(parent_out);
 
         if (dup2(child_in, STDIN_FILENO) < 0) {
+            ::close(child_in);
+            ::close(child_out);
+
             throw std::runtime_error(std::strerror(errno));
         }
         if (dup2(child_out, STDOUT_FILENO) < 0) {
+            ::close(child_in);
+            ::close(child_out);
+
             throw std::runtime_error(std::strerror(errno));
         }
 
