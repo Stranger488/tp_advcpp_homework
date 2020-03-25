@@ -2,20 +2,31 @@
 #define LOGGER_HPP
 
 
+#include <memory>
+#include "BaseLogger.hpp"
+#include "StdoutLogger.hpp"
+
+namespace Log {
+
 class Logger {
 public:
-    static Logger &get_instance();
+    static Logger& get_instance();
+
+    std::unique_ptr<BaseLogger>& get_global_logger();
+    void set_global_logger(std::unique_ptr<BaseLogger>&& logger);
 
 private:
-    Logger(Logger const &) = delete;             // Copy construct
-    Logger(Logger &&) = delete;                  // Move construct
-    Logger &operator=(Logger const &) = delete;  // Copy assign
-    Logger &operator=(Logger &&) = delete;      // Move assign
+    std::unique_ptr<BaseLogger> global_logger_;
 
-    void get_global_logger();
+    Logger();
 
-    void set_global_logger();
+    Logger(const Logger&) = delete;             // Copy construct
+    Logger(Logger&&) = delete;                  // Move construct
+    Logger& operator=(const Logger&) = delete;  // Copy assign
+    Logger& operator=(Logger&&) = delete;       // Move assign
 };
+
+} // namespace Log
 
 
 #endif // LOGGER_HPP

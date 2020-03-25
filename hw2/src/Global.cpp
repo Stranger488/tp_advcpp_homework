@@ -1,5 +1,7 @@
+#include <Logger.hpp>
 #include "Global.hpp"
 
+namespace Log {
 
 void create_file_logger() {
     return;
@@ -13,19 +15,20 @@ void create_stderr_logger() {
     return;
 }
 
-void debug(const std::string &msg) {
+void debug(const std::string& msg) {
 
 }
 
-void info(const std::string &msg) {
+void info(const std::string& msg) {
 
 }
 
-void warning(const std::string &msg) {
+void warning(const std::string& msg) {
 
 }
 
-void error(const std::string &msg) {
+void error(const std::string& msg) {
 
 }
 
+}
