@@ -1,8 +1,6 @@
 #include <Logger.hpp>
 #include <FileLogger.hpp>
 #include <StderrLogger.hpp>
-#include <iostream>
-#include "Global.hpp"
 
 namespace Log {
 
@@ -19,31 +17,31 @@ void create_stderr_logger(const Level lvl) {
 }
 
 void debug(const std::string& msg) {
-    std::unique_ptr<BaseLogger>& logger = Logger::get_instance().get_global_logger();
+    auto& logger = Logger::get_instance().get_global_logger();
     if (logger) {
         logger->debug(msg);
     }
 }
 
 void info(const std::string& msg) {
-    std::unique_ptr<BaseLogger>& logger = Logger::get_instance().get_global_logger();
+    auto& logger = Logger::get_instance().get_global_logger();
     if (logger) {
         logger->info(msg);
     }
 }
 
 void warning(const std::string& msg) {
-    std::unique_ptr<BaseLogger>& logger = Logger::get_instance().get_global_logger();
+    auto& logger = Logger::get_instance().get_global_logger();
     if (logger) {
         logger->warn(msg);
     }
 }
 
 void error(const std::string& msg) {
-    std::unique_ptr<BaseLogger>& logger = Logger::get_instance().get_global_logger();
+    auto& logger = Logger::get_instance().get_global_logger();
     if (logger) {
         logger->error(msg);
     }
 }
 
-}
+} // namespace Log

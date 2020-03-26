@@ -9,7 +9,7 @@ namespace Log {
 class StderrLogger : public BaseLogger {
 public:
     StderrLogger() = default;
-    StderrLogger(const Level lvl);
+    explicit StderrLogger(const Level lvl);
 
     void flush() override;
 

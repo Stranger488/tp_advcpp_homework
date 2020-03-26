@@ -23,13 +23,11 @@ void LogInitializer::parse_option(int argc, char* argv[]) {
             { "warn", no_argument, nullptr, 'w' },
             { "log-to-stderr", no_argument, nullptr, 'e' },
             { "log-to-file", optional_argument, nullptr, 'f' },
-            {nullptr, no_argument, nullptr, 0 }
+            { nullptr, no_argument, nullptr, 0 }
     };
 
     int opt = -1;
-    int option_index = -1;
-
-    while(((opt = getopt_long(argc, argv, short_opts.c_str(), long_opts, &option_index)) != -1)) {
+    while(((opt = getopt_long(argc, argv, short_opts.c_str(), long_opts, nullptr)) != -1)) {
         if (opt == 'v') {
             lvl = Level::DEBUG;
         } else if (opt == 'q') {

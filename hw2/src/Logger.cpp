@@ -1,6 +1,5 @@
 #include "Logger.hpp"
 
-
 namespace Log {
 
 Logger::Logger() : global_logger_(std::make_unique<StdoutLogger>()) {}
@@ -19,3 +18,4 @@ void Logger::set_global_logger(std::unique_ptr<BaseLogger>&& logger) {
 }
 
 } // namespace Log
+

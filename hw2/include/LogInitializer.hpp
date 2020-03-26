@@ -12,6 +12,7 @@ enum class LogOutput {
 
 class LogInitializer {
 public:
+    LogInitializer() = delete;
     explicit LogInitializer(int argc, char* argv[]);
     void parse_option(int argc, char* argv[]);
     void init_logger();
@@ -23,5 +24,6 @@ private:
 };
 
 } // namespace Log
+
 
 #endif // LOGINITIALIZER_HPP

@@ -22,4 +22,5 @@ private:
 
 } // namespace Log
 
+
 #endif // FILELOGGER_HPP
