@@ -4,7 +4,7 @@ project(hw1)
 add_compile_options(-O3)
 set(CMAKE_CXX_STANDARD 17)
 
-add_library(process STATIC src/process.cpp)
+add_library(process STATIC src/pipe.cpp src/process.cpp)
 
 target_include_directories(process PUBLIC include)
 

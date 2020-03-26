@@ -2,58 +2,27 @@
 #include <stdexcept>
 #include <unistd.h>
 #include <sys/wait.h>
-#include <iostream>
 
-#include "process.h"
+#include "pipe.hpp"
+#include "process.hpp"
 
 Process::Process(const std::string &path) {
-    int from_parent_to_child[2];
-    int from_child_to_parent[2];
-
-    if (pipe(from_parent_to_child) < 0) {
-        throw std::runtime_error(std::strerror(errno));
-    }
-    if (pipe(from_child_to_parent) < 0) {
-        ::close(from_parent_to_child[0]);
-        ::close(from_parent_to_child[1]);
-
-        throw std::runtime_error(std::strerror(errno));
-    }
-
-    int parent_in = from_child_to_parent[0];
-    int parent_out = from_parent_to_child[1];
-
-    int child_in = from_parent_to_child[0];
-    int child_out = from_child_to_parent[1];
+    Pipe from_parent_to_child;
+    Pipe from_child_to_parent;
 
     proc_pid = fork();
     if (proc_pid == -1) {
-        ::close(parent_in);
-        ::close(parent_out);
-
-        ::close(child_in);
-        ::close(child_out);
-
         throw std::runtime_error(std::strerror(errno));
     } else if (proc_pid == 0) {  // child
-        ::close(parent_in);
-        ::close(parent_out);
+        from_child_to_parent.close_in();
+        from_parent_to_child.close_out();
 
-        if (dup2(child_in, STDIN_FILENO) < 0) {
-            ::close(child_in);
-            ::close(child_out);
-
+        if (dup2(from_parent_to_child.get_pipe_in(), STDIN_FILENO) < 0) {
             throw std::runtime_error(std::strerror(errno));
         }
-        if (dup2(child_out, STDOUT_FILENO) < 0) {
-            ::close(child_in);
-            ::close(child_out);
-
+        if (dup2(from_child_to_parent.get_pipe_out(), STDOUT_FILENO) < 0) {
             throw std::runtime_error(std::strerror(errno));
         }
-
-        ::close(child_in);
-        ::close(child_out);
 
         char *args[2] = {
                 const_cast<char *>(path.c_str()),
@@ -64,11 +33,8 @@ Process::Process(const std::string &path) {
             throw std::runtime_error(std::strerror(errno));
         }
     } else { // parent
-        ::close(child_in);
-        ::close(child_out);
-
-        proc_in = parent_in;
-        proc_out = parent_out;
+        proc_in = from_child_to_parent.extract_in();
+        proc_out = from_parent_to_child.extract_out();
 
         proc_in_state = ProcessStates::IS_OPENED;
         proc_out_state = ProcessStates::IS_OPENED;
@@ -168,6 +134,7 @@ bool Process::isWorking() const {
     int status = 0;
 
     int res = waitpid(proc_pid, &status, WNOHANG);
+
     if (res == 0) { // child process is not finished
         return true;
     } else if (res < 0) {
