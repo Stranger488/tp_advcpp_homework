@@ -1,5 +1,5 @@
 #include "FileLogger.hpp"
-
+#include "LogOutputModifier.hpp"
 
 namespace Log {
 
@@ -22,7 +22,7 @@ void FileLogger::flush() {
 
 void FileLogger::log(const std::string& msg, const Level lvl) {
     if (lvl >= level()) {
-        file_out << static_cast<int>(lvl) << " " << msg << std::endl;
+        file_out << LogOutputModifier(lvl, true) << msg << std::endl;
     }
 }
 

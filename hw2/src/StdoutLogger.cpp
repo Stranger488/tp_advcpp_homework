@@ -1,4 +1,5 @@
 #include <iostream>
+#include <LogOutputModifier.hpp>
 #include "StdoutLogger.hpp"
 
 namespace Log {
@@ -11,7 +12,7 @@ void StdoutLogger::flush() {
 
 void StdoutLogger::log(const std::string& msg, const Level lvl) {
     if (lvl >= level()) {
-        std::cout << static_cast<int>(lvl) << " " << msg << std::endl;
+        std::cout << LogOutputModifier(lvl, false) << msg << std::endl;
     }
 }
 

@@ -2,7 +2,7 @@
 #include "Global.hpp"
 
 int main(int argc, char* argv[]) {
-    Log::create_stdout_logger(Log::Level::INFO);
+    Log::create_stderr_logger(Log::Level::INFO);
 
     Log::debug("debug msg");
     Log::info("info msg");
