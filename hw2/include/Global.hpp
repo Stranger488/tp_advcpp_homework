@@ -2,6 +2,8 @@
 #define GLOBAL_HPP
 
 #include <string>
+#include <getopt.h>
+#include "BaseLogger.hpp"
 
 namespace Log {
 

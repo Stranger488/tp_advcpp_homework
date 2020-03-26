@@ -1,6 +1,7 @@
 #include <Logger.hpp>
 #include <FileLogger.hpp>
 #include <StderrLogger.hpp>
+#include <iostream>
 #include "Global.hpp"
 
 namespace Log {

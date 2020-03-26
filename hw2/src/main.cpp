@@ -1,8 +1,8 @@
-#include "BaseLogger.hpp"
+#include <LogInitializer.hpp>
 #include "Global.hpp"
 
 int main(int argc, char* argv[]) {
-    Log::create_stderr_logger(Log::Level::INFO);
+    Log::LogInitializer log(argc, argv);
 
     Log::debug("debug msg");
     Log::info("info msg");
