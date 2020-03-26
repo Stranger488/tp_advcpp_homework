@@ -5,9 +5,9 @@
 
 namespace Log {
 
-void create_file_logger();
-void create_stdout_logger();
-void create_stderr_logger();
+void create_file_logger(const std::string& path, const Level lvl);
+void create_stdout_logger(const Level lvl);
+void create_stderr_logger(const Level lvl);
 
 void debug(const std::string& msg);
 void info(const std::string& msg);

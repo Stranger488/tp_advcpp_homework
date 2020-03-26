@@ -1,7 +1,8 @@
 #include "BaseLogger.hpp"
 
-
 namespace Log {
+
+BaseLogger::BaseLogger(const Level lvl) : level_(lvl) {}
 
 void BaseLogger::debug(const std::string& msg) {
     log(msg, Level::DEBUG);

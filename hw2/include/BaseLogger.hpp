@@ -13,6 +13,7 @@ enum class Level {
 class BaseLogger {
 public:
     BaseLogger() = default;
+    explicit BaseLogger(const Level lvl);
     virtual ~BaseLogger() noexcept = default;
 
     void debug(const std::string& msg);

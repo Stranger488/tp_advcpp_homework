@@ -9,6 +9,7 @@ namespace Log {
 class StdoutLogger : public BaseLogger {
 public:
     StdoutLogger() = default;
+    explicit StdoutLogger(const Level lvl);
 
     void flush() override;
 

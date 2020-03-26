@@ -9,7 +9,8 @@ namespace Log {
 
 class FileLogger : public BaseLogger {
 public:
-    FileLogger() = default;
+    FileLogger();
+    explicit FileLogger(const std::string& file, const Level lvl);
 
     void flush() override;
 
