@@ -123,6 +123,7 @@ void Process::closeStdin() {
 
 void Process::close() {
     closeStdin();
+    ::close(proc_out);
 
     kill(proc_pid, SIGTERM);
 
