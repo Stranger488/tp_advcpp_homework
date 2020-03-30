@@ -3,7 +3,6 @@
 
 
 #include <string>
-#include <unordered_map>
 
 namespace Log {
 
@@ -14,7 +13,7 @@ enum class Level {
 class BaseLogger {
 public:
     BaseLogger() = default;
-    explicit BaseLogger(const Level lvl);
+    explicit BaseLogger(Level lvl);
     virtual ~BaseLogger() noexcept = default;
 
     void debug(const std::string& msg);
@@ -22,15 +21,15 @@ public:
     void warn(const std::string& msg);
     void error(const std::string& msg);
 
-    void set_level(const Level lvl);
-    const Level level();
+    void set_level(Level lvl);
+    Level level() const;
 
     virtual void flush() = 0;
 
 private:
     Level level_ = Level::DEBUG;
 
-    virtual void log(const std::string& msg, const Level lvl) = 0;
+    virtual void log(const std::string& msg, Level lvl) = 0;
 };
 
 } // namespace Log

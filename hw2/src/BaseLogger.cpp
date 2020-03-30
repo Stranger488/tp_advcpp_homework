@@ -2,7 +2,7 @@
 
 namespace Log {
 
-BaseLogger::BaseLogger(const Level lvl) : level_(lvl) {}
+BaseLogger::BaseLogger(Level lvl) : level_(lvl) {}
 
 void BaseLogger::debug(const std::string& msg) {
     log(msg, Level::DEBUG);
@@ -20,11 +20,11 @@ void BaseLogger::error(const std::string& msg) {
     log(msg, Level::ERROR);
 }
 
-void BaseLogger::set_level(const Level lvl) {
+void BaseLogger::set_level(Level lvl) {
     level_ = lvl;
 }
 
-const Level BaseLogger::level() {
+Level BaseLogger::level() const {
     return level_;
 }
 

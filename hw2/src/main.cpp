@@ -2,7 +2,7 @@
 #include "Global.hpp"
 
 int main(int argc, char* argv[]) {
-    Log::LogInitializer log(argc, argv);
+    LogInitializer log(argc, argv);
 
     Log::debug("debug msg");
     Log::info("info msg");

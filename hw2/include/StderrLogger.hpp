@@ -9,12 +9,12 @@ namespace Log {
 class StderrLogger : public BaseLogger {
 public:
     StderrLogger() = default;
-    explicit StderrLogger(const Level lvl);
+    explicit StderrLogger(Level lvl);
 
     void flush() override;
 
 private:
-    void log(const std::string& msg, const Level lvl) override;
+    void log(const std::string& msg, Level lvl) override;
 };
 
 } // namespace Log

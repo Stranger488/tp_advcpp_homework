@@ -2,14 +2,14 @@
 #define GLOBAL_HPP
 
 #include <string>
-#include <getopt.h>
+#include <memory>
 #include "BaseLogger.hpp"
 
 namespace Log {
 
-void create_file_logger(const std::string& path, const Level lvl);
-void create_stdout_logger(const Level lvl);
-void create_stderr_logger(const Level lvl);
+std::unique_ptr<BaseLogger> create_file_logger(const std::string& path, Level lvl);
+std::unique_ptr<BaseLogger> create_stdout_logger(Level lvl);
+std::unique_ptr<BaseLogger> create_stderr_logger(Level lvl);
 
 void debug(const std::string& msg);
 void info(const std::string& msg);

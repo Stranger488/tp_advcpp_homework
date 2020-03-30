@@ -1,14 +1,13 @@
 #include <getopt.h>
 #include <iostream>
 #include <Global.hpp>
+#include <Logger.hpp>
 #include "LogInitializer.hpp"
 
-namespace Log {
-
 LogInitializer::LogInitializer(int argc, char* argv[]) {
-    lvl = Level::INFO;
-    out = LogOutput::STDOUT;
-    file = "log.log";
+    lvl_ = Log::Level::INFO;
+    out_ = LogOutput::STDOUT;
+    file_ = "log.log";
 
     parse_option(argc, argv);
     init_logger();
@@ -29,18 +28,18 @@ void LogInitializer::parse_option(int argc, char* argv[]) {
     int opt = -1;
     while(((opt = getopt_long(argc, argv, short_opts.c_str(), long_opts, nullptr)) != -1)) {
         if (opt == 'v') {
-            lvl = Level::DEBUG;
+            lvl_ = Log::Level::DEBUG;
         } else if (opt == 'q') {
-            lvl = Level::ERROR;
+            lvl_ = Log::Level::ERROR;
         } else if (opt == 'w') {
-            lvl = Level::WARN;
+            lvl_ = Log::Level::WARN;
         } else if (opt == 'f') {
-            out = LogOutput::FILE;
+            out_ = LogOutput::FILE;
             if (optarg) {
-                file = optarg;
+                file_ = optarg;
             }
         } else if (opt == 'e') {
-            out = Log::LogOutput::STDERR;
+            out_ = LogOutput::STDERR;
         } else {
             std::cerr << "Parse options error. Default level is INFO, default output is std::ostream." << std::endl;
         }
@@ -48,13 +47,13 @@ void LogInitializer::parse_option(int argc, char* argv[]) {
 }
 
 void LogInitializer::init_logger() {
-    if (out == LogOutput::FILE) {
-        create_file_logger(file, lvl);
-    } else if (out == LogOutput::STDOUT) {
-        create_stdout_logger(lvl);
-    } else if (out == LogOutput::STDERR) {
-        create_stderr_logger(lvl);
+    Log::Logger& logger = Log::Logger::get_instance();
+
+    if (out_ == LogOutput::FILE) {
+        logger.set_global_logger(create_file_logger(file_, lvl_));
+    } else if (out_ == LogOutput::STDOUT) {
+        logger.set_global_logger(create_stdout_logger(lvl_));
+    } else if (out_ == LogOutput::STDERR) {
+        logger.set_global_logger(create_stderr_logger(lvl_));
     }
 }
-
-} // namespace Log

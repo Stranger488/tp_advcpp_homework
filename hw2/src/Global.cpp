@@ -4,16 +4,16 @@
 
 namespace Log {
 
-void create_file_logger(const std::string& path, const Level lvl) {
-    Logger::get_instance().set_global_logger(std::make_unique<FileLogger>(path, lvl));
+std::unique_ptr<BaseLogger> create_file_logger(const std::string& path, Level lvl) {
+    return std::make_unique<FileLogger>(path, lvl);
 }
 
-void create_stdout_logger(const Level lvl) {
-    Logger::get_instance().set_global_logger(std::make_unique<StdoutLogger>(lvl));
+std::unique_ptr<BaseLogger> create_stdout_logger(Level lvl) {
+    return std::make_unique<StdoutLogger>(lvl);
 }
 
-void create_stderr_logger(const Level lvl) {
-    Logger::get_instance().set_global_logger(std::make_unique<StderrLogger>(lvl));
+std::unique_ptr<BaseLogger> create_stderr_logger(Level lvl) {
+    return std::make_unique<StderrLogger>(lvl);
 }
 
 void debug(const std::string& msg) {

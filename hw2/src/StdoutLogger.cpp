@@ -12,7 +12,7 @@ void StdoutLogger::flush() {
 
 void StdoutLogger::log(const std::string& msg, const Level lvl) {
     if (lvl >= level()) {
-        std::cout << LogOutputModifier(lvl, false) << msg << std::endl;
+        std::cout << LogOutputModifier(lvl, LogColorState::COLORED) << msg << std::endl;
     }
 }
 
