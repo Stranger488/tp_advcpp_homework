@@ -7,10 +7,11 @@
 
 namespace Tcp {
 
+static const int DEFAULT_MAX_CONNECTION_NUMBER = 2;
+
 class Server {
 public:
     Server(const std::string& address, uint16_t port);
-
     ~Server() noexcept;
 
     void open(const std::string& address, uint16_t port);
@@ -22,6 +23,9 @@ public:
 
 private:
     int fd_;
+    int max_connect_ = DEFAULT_MAX_CONNECTION_NUMBER;
+
+    bool is_opened_;
 };
 
 } // namespace Tcp

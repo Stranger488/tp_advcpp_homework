@@ -10,7 +10,12 @@
 namespace Tcp {
 
 Connection::Connection(const std::string& address, uint16_t port)
-    : dst_addr_(address), dst_port_(port), fd_(Socket()) {
+    : dst_addr_(address), dst_port_(port) {
+    int res = socket(AF_INET, SOCK_STREAM, 0);
+    if (res < 0) {
+        throw std::runtime_error(std::strerror(errno));
+    }
+
     connect(dst_addr_, dst_port_);
 }
 
@@ -25,34 +30,40 @@ void Connection::connect(const std::string& address, uint16_t port) {
 
     int res = inet_aton(address.c_str(), &addr.sin_addr);
     if (res == 0) { // invalid ip address is given
+        close();
         throw std::runtime_error(std::string("Error while converting ip address: invalid ip address."));
     } else if (res < 0) {
+        close();
         throw std::runtime_error(std::strerror(errno));
     }
 
-    res = ::connect(fd_.get_fd(),
-            reinterpret_cast<sockaddr*>(&addr),
-            sizeof(addr));
+    res = ::connect(fd_,
+                    reinterpret_cast<sockaddr*>(&addr),
+                    sizeof(addr));
     if (res < 0) {
+        close();
         throw std::runtime_error(std::strerror(errno));
     }
 }
 
 void Connection::set_timeout(time_t time) {
-    timeval timeout{.tv_sec = 5, .tv_usec= 0};
-    int res = setsockopt(fd_.get_fd(),
+    timeval timeout{ .tv_sec = time, .tv_usec= 0 };
+
+    int res = setsockopt(fd_,
                          SOL_SOCKET,
                          SO_SNDTIMEO,
                          &timeout,
                          sizeof(timeout));
     if (res < 0) {
+        close();
         throw std::runtime_error(std::strerror(errno));
     }
 }
 
 size_t Connection::write(const void *data, size_t len) {
-    ssize_t bytes = ::write(fd_.get_fd(), data, len);
+    ssize_t bytes = ::write(fd_, data, len);
     if (bytes < 0) {
+        close();
         throw std::runtime_error(std::strerror(errno));
     }
 
@@ -68,8 +79,9 @@ void Connection::writeExact(const void *data, size_t len) {
 }
 
 size_t Connection::read(void *data, size_t len) {
-    ssize_t bytes = ::read(fd_.get_fd(), data, len);
+    ssize_t bytes = ::read(fd_, data, len);
     if (bytes < 0) {
+        close();
         throw std::runtime_error(std::strerror(errno));
     }
 
@@ -88,7 +100,7 @@ bool Connection::is_opened() const {
 }
 
 void Connection::close() {
-    fd_.close();
+    ::close(fd_);
 
     is_opened_ = false;
 }

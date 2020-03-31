@@ -3,7 +3,6 @@
 
 
 #include <string>
-#include "Socket.hpp"
 
 namespace Tcp {
 
@@ -25,7 +24,7 @@ public:
     void close();
 
 private:
-    Socket fd_;
+    int fd_;
 
     std::string dst_addr_;
     uint16_t dst_port_;

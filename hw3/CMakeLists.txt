@@ -4,7 +4,7 @@ project(hw3)
 add_compile_options(-O3)
 set(CMAKE_CXX_STANDARD 17)
 
-add_library(tcp STATIC src/Connection.cpp src/Server.cpp src/Socket.cpp)
+add_library(tcp STATIC src/Connection.cpp src/Server.cpp)
 
 target_include_directories(tcp PUBLIC include)
 
