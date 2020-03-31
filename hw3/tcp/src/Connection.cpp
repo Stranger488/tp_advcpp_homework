@@ -15,6 +15,7 @@ Connection::Connection(const std::string& address, uint16_t port)
     if (res < 0) {
         throw std::runtime_error(std::strerror(errno));
     }
+    fd_ = res;
 
     connect(dst_addr_, dst_port_);
 }

@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include <arpa/inet.h>
+#include <iostream>
 
 #include "Server.hpp"
 
@@ -13,12 +14,13 @@ Server::Server(const std::string& address, uint16_t port) {
     if (res < 0) {
         throw std::runtime_error(std::strerror(errno));
     }
+    fd_ = res;
 
-
+    open(address, port);
 }
 
 Server::~Server() noexcept {
-
+    close();
 }
 
 void Server::open(const std::string& address, uint16_t port) {
@@ -69,6 +71,8 @@ Connection Server::accept() {
         close();
         throw std::runtime_error(std::strerror(errno));
     }
+
+    std::cout << buf << std::endl;
 
     return Connection(buf, client_addr.sin_port);
 }
