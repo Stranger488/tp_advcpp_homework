@@ -3,18 +3,16 @@
 #include <unistd.h>
 
 #include <arpa/inet.h>
-#include <iostream>
 
 #include "Server.hpp"
 
 namespace Tcp {
 
 Server::Server(const std::string& address, uint16_t port) {
-    int res = socket(AF_INET, SOCK_STREAM, 0);
-    if (res < 0) {
+    fd_ = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd_ < 0) {
         throw std::runtime_error(std::strerror(errno));
     }
-    fd_ = res;
 
     open(address, port);
 }
@@ -29,9 +27,9 @@ void Server::open(const std::string& address, uint16_t port) {
     addr.sin_port = htons(port);
 
     int res = inet_aton(address.c_str(), &addr.sin_addr);
-    if (res == 0) { // invalid ip address is given
+    if (res == 0) { // invalid IP address is given
         close();
-        throw std::runtime_error(std::string("Error while converting ip address: invalid ip address."));
+        throw std::runtime_error(std::string("Error while converting IP address: invalid IP address."));
     } else if (res < 0) {
         close();
         throw std::runtime_error(std::strerror(errno));
@@ -57,24 +55,24 @@ void Server::set_max_connect(int max_connect) {
 Connection Server::accept() {
     sockaddr_in client_addr{};
     socklen_t addr_size = sizeof(client_addr);
-    int res = ::accept(fd_,
+
+    int sock_fd = ::accept(fd_,
                      reinterpret_cast<sockaddr*>(&client_addr),
                      &addr_size);
-    if (res < 0) {
-        close();
+    if (sock_fd < 0) {
         throw std::runtime_error(std::strerror(errno));
     }
 
-    std::string buf(addr_size, '\0');
-    const char* temp = inet_ntop(AF_INET, &client_addr.sin_addr.s_addr, buf.data(), addr_size);
-    if (temp == nullptr) {
-        close();
+
+    std::string client_addr_string(addr_size, '\0');
+    const char* res_addr = inet_ntop(AF_INET, &client_addr.sin_addr, client_addr_string.data(), addr_size);
+    if (res_addr == nullptr) {
         throw std::runtime_error(std::strerror(errno));
     }
 
-    std::cout << buf << std::endl;
+    uint16_t client_addr_port = client_addr.sin_port;
 
-    return Connection(buf, client_addr.sin_port);
+    return Connection(client_addr_string, client_addr_port, sock_fd);
 }
 
 bool Server::is_opened() const {
