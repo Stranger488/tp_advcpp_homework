@@ -22,7 +22,9 @@ void FileLogger::flush() {
 
 void FileLogger::log(const std::string& msg, Level lvl) {
     if (lvl >= level()) {
-        file_out_ << LogOutputModifier(lvl, LogColorState::UNCOLORED) << msg << std::endl;
+        LogOutputModifier output_modifier(lvl, LogState::UNCOLORED);
+
+        file_out_ << output_modifier << msg << std::endl;
     }
 }
 

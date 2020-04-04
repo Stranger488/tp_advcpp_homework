@@ -9,8 +9,8 @@ Logger& Logger::get_instance() {
     return logger;
 }
 
-std::unique_ptr<BaseLogger>& Logger::get_global_logger() {
-    return global_logger_;
+BaseLogger& Logger::get_global_logger() {
+    return *global_logger_;
 }
 
 void Logger::set_global_logger(std::unique_ptr<BaseLogger> logger) {

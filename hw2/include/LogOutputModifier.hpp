@@ -14,20 +14,23 @@ enum class LogColorCode {
     DEFAULT = 39
 };
 
-enum class LogColorState {
-    COLORED, UNCOLORED
+enum class LogState {
+    COLORED, UNCOLORED, RESET
 };
 
 class LogOutputModifier {
 public:
-    LogOutputModifier(Level lvl, LogColorState color_state);
+    LogOutputModifier(Level lvl, LogState state);
 
     friend std::ostream& operator<<(std::ostream& os, const LogOutputModifier& mod);
+
+    const LogOutputModifier& set_log_output(Level lvl, LogState state);
+    const LogOutputModifier& reset_log_output();
 
 private:
     LogColorCode code_;
     std::string string_;
-    LogColorState state_;
+    LogState state_;
 };
 
 } // namespace Log

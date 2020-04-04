@@ -12,7 +12,7 @@ class Logger {
 public:
     static Logger& get_instance();
 
-    std::unique_ptr<BaseLogger>& get_global_logger();
+    BaseLogger& get_global_logger();
     void set_global_logger(std::unique_ptr<BaseLogger> logger);
 
 private:

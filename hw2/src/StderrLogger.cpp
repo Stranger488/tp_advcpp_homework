@@ -12,7 +12,11 @@ void StderrLogger::flush() {
 
 void StderrLogger::log(const std::string& msg, Level lvl) {
     if (lvl >= level()) {
-        std::cerr << LogOutputModifier(lvl, LogColorState::COLORED) << msg << std::endl;
+        LogOutputModifier output_modifier(lvl, LogState::COLORED);
+
+        std::cerr << output_modifier << msg << std::endl;
+        std::cerr << output_modifier.reset_log_output();
+        flush();
     }
 }
 
