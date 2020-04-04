@@ -2,7 +2,6 @@
 #define LOGOUTPUTMODIFIER_HPP
 
 
-#include <unordered_map>
 #include "BaseLogger.hpp"
 
 namespace Log {

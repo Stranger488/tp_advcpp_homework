@@ -1,5 +1,7 @@
-#include "LogOutputModifier.hpp"
 #include <ostream>
+#include <unordered_map>
+
+#include "LogOutputModifier.hpp"
 
 namespace Log {
 

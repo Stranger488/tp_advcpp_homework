@@ -3,8 +3,8 @@
 
 
 #include <memory>
+
 #include "BaseLogger.hpp"
-#include "StdoutLogger.hpp"
 
 namespace Log {
 

@@ -1,5 +1,5 @@
-#include <LogInitializer.hpp>
 #include "Global.hpp"
+#include "LogInitializer.hpp"
 
 int main(int argc, char* argv[]) {
     LogInitializer log(argc, argv);

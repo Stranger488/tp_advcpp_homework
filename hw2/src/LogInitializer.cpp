@@ -1,7 +1,8 @@
 #include <getopt.h>
 #include <iostream>
-#include <Global.hpp>
-#include <Logger.hpp>
+
+#include "Logger.hpp"
+#include "Global.hpp"
 #include "LogInitializer.hpp"
 
 LogInitializer::LogInitializer(int argc, char* argv[]) {

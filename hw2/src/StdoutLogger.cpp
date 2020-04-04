@@ -1,5 +1,6 @@
 #include <iostream>
-#include <LogOutputModifier.hpp>
+
+#include "LogOutputModifier.hpp"
 #include "StdoutLogger.hpp"
 
 namespace Log {

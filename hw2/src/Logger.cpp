@@ -1,4 +1,5 @@
 #include "Logger.hpp"
+#include "StdoutLogger.hpp"
 
 namespace Log {
 

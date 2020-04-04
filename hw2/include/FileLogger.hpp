@@ -3,6 +3,7 @@
 
 
 #include <fstream>
+
 #include "BaseLogger.hpp"
 
 namespace Log {

@@ -1,6 +1,9 @@
-#include <Logger.hpp>
-#include <FileLogger.hpp>
-#include <StderrLogger.hpp>
+#include <memory>
+
+#include "Logger.hpp"
+#include "FileLogger.hpp"
+#include "StderrLogger.hpp"
+#include "StdoutLogger.hpp"
 
 namespace Log {
 
