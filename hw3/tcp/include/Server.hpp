@@ -16,14 +16,14 @@ public:
 
     void open(const std::string& address, uint16_t port);
     Connection accept();
-    void set_max_connect(int max_connect);
+    void set_max_connect(size_t max_connect);
 
     bool is_opened() const;
     void close();
 
 private:
     int fd_;
-    int max_connect_ = DEFAULT_MAX_CONNECTION_NUMBER;
+    size_t max_connect_ = DEFAULT_MAX_CONNECTION_NUMBER;
 
     bool is_opened_;
 };

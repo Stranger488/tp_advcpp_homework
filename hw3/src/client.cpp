@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
     }
 
     try {
-        Tcp::Connection connection(std::string(argv[1]), std::stoi(argv[2]));
+        Tcp::Connection connection(argv[1], std::stoi(argv[2]));
         std::cout << "Connected." << std::endl;
 
 

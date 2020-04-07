@@ -15,6 +15,7 @@ Server::Server(const std::string& address, uint16_t port) {
     }
 
     open(address, port);
+    is_opened_ = true;
 }
 
 Server::~Server() noexcept {
@@ -44,7 +45,7 @@ void Server::open(const std::string& address, uint16_t port) {
     set_max_connect(max_connect_);
 }
 
-void Server::set_max_connect(int max_connect) {
+void Server::set_max_connect(size_t max_connect) {
     int res = listen(fd_, max_connect);
     if (res < 0) {
         close();
@@ -67,6 +68,7 @@ Connection Server::accept() {
     std::string client_addr_string(addr_size, '\0');
     const char* res_addr = inet_ntop(AF_INET, &client_addr.sin_addr, client_addr_string.data(), addr_size);
     if (res_addr == nullptr) {
+        ::close(sock_fd);
         throw std::runtime_error(std::strerror(errno));
     }
 
