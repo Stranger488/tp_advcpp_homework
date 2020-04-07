@@ -15,7 +15,9 @@ BaseLogger& Logger::get_global_logger() {
 }
 
 void Logger::set_global_logger(std::unique_ptr<BaseLogger> logger) {
-    global_logger_ = std::move(logger);
+    if (logger) {
+        global_logger_ = std::move(logger);
+    }
 }
 
 } // namespace Log
