@@ -7,7 +7,7 @@
 
 namespace Tcp {
 
-static const int DEFAULT_MAX_CONNECTION_NUMBER = 2;
+static const size_t DEFAULT_MAX_CONNECTION_NUMBER = 2;
 
 class Server {
 public:
