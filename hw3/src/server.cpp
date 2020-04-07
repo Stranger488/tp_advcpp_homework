@@ -8,7 +8,7 @@ int main(int argc, char* argv[]) {
     }
 
     try {
-        Tcp::Server server(std::string(argv[1]), std::stoi(argv[2]));
+        Tcp::Server server(argv[1], std::stoi(argv[2]));
         Tcp::Connection connection = server.accept();
 
         std::cout << "Connection accepted." << std::endl;
