@@ -4,7 +4,7 @@ project(hw4)
 add_compile_options(-O3)
 set(CMAKE_CXX_STANDARD 17)
 
-set(LOG_LIB_SRCS tcp_epoll/src/Connection.cpp tcp_epoll/src/Server.cpp)
+set(LOG_LIB_SRCS tcp_epoll/src/FileDescriptor.cpp tcp_epoll/src/Connection.cpp tcp_epoll/src/Server.cpp)
 
 set(SRCS src/server.cpp)
 

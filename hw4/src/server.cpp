@@ -8,6 +8,11 @@ int main(int argc, char* argv[]) {
     }
 
     try {
+        auto handler = [] (Tcp_epoll::Connection& c) {
+
+        };
+
+        Tcp_epoll::Server server(argv[1], std::stoi(argv[2]), handler);
 
     } catch (std::runtime_error &err) {
         std::cout << err.what() << std::endl;

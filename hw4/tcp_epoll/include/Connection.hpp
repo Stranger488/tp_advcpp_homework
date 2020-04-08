@@ -4,6 +4,7 @@
 
 #include <string>
 #include <arpa/inet.h>
+#include "FileDescriptor.hpp"
 
 namespace Tcp_epoll {
 
@@ -16,7 +17,7 @@ class Connection {
 public:
     Connection(const std::string& address, uint16_t port);
     Connection(const std::string& dst_addr, uint16_t dst_port,
-               int sock_fd);
+               FileDescriptor sock_fd);
     ~Connection() noexcept;
 
     void connect(const std::string& address, uint16_t port);
@@ -33,7 +34,7 @@ public:
     void close();
 
 private:
-    int fd_;
+    FileDescriptor fd_;
 
     std::string dst_addr_;
     uint16_t dst_port_;
