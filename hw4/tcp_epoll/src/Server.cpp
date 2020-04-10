@@ -2,13 +2,16 @@
 #include <cstring>
 #include <utility>
 #include <unistd.h>
+#include <iostream>
 
 #include "Server.hpp"
 
 namespace Tcp_epoll {
 
-void Server::init(const std::string& address, uint16_t port, Callback handler) {
-    handler_ = std::move(handler);
+void Server::init(const std::string& address, uint16_t port,
+        Callback read_from_client_handler, Callback write_to_client_handler) {
+    read_from_client_handler_ = std::move(read_from_client_handler);
+    write_to_client_handler_ = std::move(write_to_client_handler);
 
     fd_ = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
     if (fd_ < 0) {
@@ -82,16 +85,6 @@ void Server::modify_epoll(int fd, uint32_t events) {
     }
 }
 
-void Server::delete_epoll(int fd, uint32_t events) {
-    epoll_event event{};
-    event.data.fd = fd;
-    event.events = events;
-
-    if (epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, &event) < 0) {
-        throw std::runtime_error(std::strerror(errno));
-    }
-}
-
 void Server::accept_clients() {
     sockaddr_in client_addr{};
     socklen_t addr_size = sizeof(client_addr);
@@ -113,15 +106,16 @@ void Server::accept_clients() {
             }
         }
 
-//        std::string client_addr_string(addr_size, '\0');
-//        const char* res_addr = inet_ntop(AF_INET, &client_addr.sin_addr, client_addr_string.data(), addr_size);
-//        if (res_addr == nullptr) {
-//            throw std::runtime_error(std::strerror(errno));
-//        }
+        std::string client_addr_string(addr_size, '\0');
+        const char* res_addr = inet_ntop(AF_INET, &client_addr.sin_addr, client_addr_string.data(), addr_size);
+        if (res_addr == nullptr) {
+            throw std::runtime_error(std::strerror(errno));
+        }
 
+        client_addr_string.erase(client_addr_string.find('\0'));
         uint16_t client_addr_port = client_addr.sin_port;
 
-        clients_.emplace(fd, Connection("127.0.0.1", 8888, fd));
+        clients_.emplace(fd, Connection(client_addr_string, client_addr_port, fd));
 
         add_epoll(fd, EPOLLIN);
     }
@@ -134,7 +128,11 @@ void Server::handle_client(int fd, uint32_t event) {
         return;
     }
 
-    handler_(clients_.at(fd));
+    if (event & EPOLLIN) {
+        read_from_client_handler_(clients_.at(fd));
+    } else if (event & EPOLLOUT) {
+        write_to_client_handler_(clients_.at(fd));
+    }
 }
 
 void Server::event_loop() {

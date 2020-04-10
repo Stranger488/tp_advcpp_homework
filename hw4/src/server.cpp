@@ -3,8 +3,7 @@
 #include <cstring>
 #include "Server.hpp"
 
-constexpr size_t MAXBUF = 1024;
-constexpr size_t BUFSIZE = 8;
+constexpr int BLOCK_SIZE = 4;
 
 int main(int argc, char* argv[]) {
     if (argc < 3) {
@@ -12,62 +11,83 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    try {
-        Tcp_epoll::Server server;
+    Tcp_epoll::Server server;
 
-        auto handler = [&server] (Tcp_epoll::Connection& connection) {
-            if (connection.get_event() == EPOLLIN) {
-                std::string buf_string_read(MAXBUF, '\0');
-                connection.set_length(BUFSIZE);
-                ssize_t bytes = connection.read(buf_string_read.data() + connection.get_offset(), MAXBUF);
+    auto read_from_client_handler = [&server] (Tcp_epoll::Connection& connection) {
+        auto con_fd = connection.get_fd_();
+        auto con_offset_read = connection.get_offset_read();
+        auto con_offset_write = connection.get_offset_read();
+        auto con_buf_data = connection.get_buf_data();
 
-                if ( (bytes == -1 && errno == EINTR) || bytes < connection.get_length()) { //
-                    server.modify_epoll(connection.get_fd_(), EPOLLIN);
+        auto con_offset = connection.get_offset();
+        ssize_t bytes = connection.read(con_buf_data + con_offset_read, BLOCK_SIZE);
 
-                    if (bytes != -1) {
-                        connection.set_length(connection.get_length() - bytes);
-                        connection.set_offset(connection.get_offset() + bytes);
-                    }
-                }
-                else if (bytes == 0) { // client disconnected
-                    server.erase_client(connection.get_fd_());
-                }
-                else {
-                    connection.set_length(0);
-                    connection.set_offset(0);
-                    server.modify_epoll(connection.get_fd_(), EPOLLOUT);
-                }
+        if (bytes == -1) {
+            std::cerr << strerror(errno) << std::endl;
+            server.erase_client(con_fd);
+        }
+        else if (bytes == 0) {
+            server.erase_client(con_fd);
+        }
+        else if (bytes < BLOCK_SIZE) {
+            connection.set_offset_read(con_offset_read + bytes);
+            connection.set_offset_write(con_offset_write + bytes);
+            connection.set_offset(con_offset + bytes);
+
+            server.modify_epoll(con_fd, EPOLLIN);
+        }
+        else {
+            connection.set_offset_read(con_offset_read + BLOCK_SIZE - con_offset_read % BLOCK_SIZE);
+            connection.set_offset(0);
+
+            server.modify_epoll(connection.get_fd_(), EPOLLOUT);
+        }
+    };
+
+    auto write_to_client_handler = [&server] (Tcp_epoll::Connection& connection) {
+        auto con_fd = connection.get_fd_();
+        auto con_offset_write = connection.get_offset_write();
+        auto con_buf_c_str = connection.get_buf_c_str();
+
+        std::cout << con_buf_c_str << std::endl;
+
+        auto con_offset = connection.get_offset();
+        ssize_t bytes = connection.write(con_buf_c_str + con_offset_write, BLOCK_SIZE);
+
+        if (bytes == -1) {
+            std::cerr << strerror(errno) << std::endl;
+            server.erase_client(con_fd);
+        }
+        else if (bytes == 0) {
+            server.erase_client(con_fd);
+        }
+        else if (bytes < BLOCK_SIZE) {
+            connection.set_offset_read(con_offset_read + bytes);
+            connection.set_offset_write(con_offset_write + bytes);
+            connection.set_offset(con_offset + bytes);
+
+            server.modify_epoll(con_fd, EPOLLOUT);
+        }
+        else {
+            if (con_offset_write == 0) {
+                connection.set_offset_write(con_offset_write + BLOCK_SIZE);
+            } else {
+                connection.set_offset_write(con_offset_write + BLOCK_SIZE - con_offset_write % BLOCK_SIZE);
             }
-            else if (connection.get_event() == EPOLLOUT) {
-                std::string buf_string_write(100, 'a');
-                connection.set_length(BUFSIZE);
-                ssize_t bytes = connection.write(buf_string_write.c_str(), buf_string_write.size());
+            connection.set_offset(0);
 
-                if ( (bytes == -1 && errno == EINTR) || bytes < connection.get_length()) {
-                    server.modify_epoll(connection.get_fd_(), EPOLLOUT);
+            server.modify_epoll(con_fd, EPOLLIN);
+        }
+    };
 
-                    if (bytes != -1) {
-                        connection.set_length(connection.get_length() - bytes);
-                        connection.set_offset(connection.get_offset() + bytes);
-                    }
-                }
-                else if (bytes == -1) {
-                    server.erase_client(connection.get_fd_());
-                }
-                else {
-                    connection.set_length(0);
-                    connection.set_offset(0);
-                    server.modify_epoll(connection.get_fd_(), EPOLLIN);
-                }
-            }
-        };
-
-        server.init(argv[1], std::stoi(argv[2]), handler);
-        server.event_loop();
-
-    } catch (std::runtime_error &err) {
-        std::cout << err.what() << std::endl;
-        return -1;
+    while (true) {
+        try {
+            server.init(argv[1], std::stoi(argv[2]), read_from_client_handler, write_to_client_handler);
+            server.event_loop();
+        } catch (std::runtime_error& err) {
+            std::cout << err.what() << std::endl;
+            server.event_loop();
+        }
     }
 
     return 0;

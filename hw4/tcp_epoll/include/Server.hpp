@@ -5,6 +5,7 @@
 #include <string>
 #include <functional>
 #include <map>
+
 #include "Connection.hpp"
 #include "FileDescriptor.hpp"
 
@@ -28,7 +29,6 @@ public:
 
     void add_epoll(int fd, uint32_t events);
     void modify_epoll(int fd, uint32_t events);
-    void delete_epoll(int fd, uint32_t events);
     void handle_client(int fd, uint32_t event);
 
     void accept_clients();
@@ -40,18 +40,19 @@ public:
     void erase_client(int key) { clients_.erase(key); };
     int get_epoll_fd() { return epoll_fd_; }
 
-    void init(const std::string& address, uint16_t port, Callback handler);
+    void init(const std::string& address, uint16_t port,
+            Callback read_from_client_handler, Callback write_to_client_handler);
 
 private:
     FileDescriptor fd_;
     FileDescriptor epoll_fd_;
 
     size_t max_connect_ = DEFAULT_MAX_CONNECTION_NUMBER;
-    bool is_opened_;
-
+    bool is_opened_ = false;
     std::map<int, Connection> clients_{};
 
-    Callback handler_;
+    Callback read_from_client_handler_;
+    Callback write_to_client_handler_;
 };
 
 } // namespace Tcp_epoll
