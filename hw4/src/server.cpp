@@ -3,7 +3,8 @@
 #include <cstring>
 #include "Server.hpp"
 
-constexpr size_t buf_string_size = 1024;
+constexpr size_t MAXBUF = 1024;
+constexpr size_t BUFSIZE = 8;
 
 int main(int argc, char* argv[]) {
     if (argc < 3) {
@@ -16,10 +17,9 @@ int main(int argc, char* argv[]) {
 
         auto handler = [&server] (Tcp_epoll::Connection& connection) {
             if (connection.get_event() == EPOLLIN) {
-                server.delete_epoll(connection.get_fd_(), EPOLLIN);
-
-                std::string buf_string_read(BUFSIZ, '\0');
-                ssize_t bytes = connection.read(buf_string_read.data(), buf_string_read.size());
+                std::string buf_string_read(MAXBUF, '\0');
+                connection.set_length(BUFSIZE);
+                ssize_t bytes = connection.read(buf_string_read.data() + connection.get_offset(), MAXBUF);
 
                 if ( (bytes == -1 && errno == EINTR) || bytes < connection.get_length()) { //
                     server.modify_epoll(connection.get_fd_(), EPOLLIN);
@@ -29,18 +29,18 @@ int main(int argc, char* argv[]) {
                         connection.set_offset(connection.get_offset() + bytes);
                     }
                 }
-                if (bytes == 0) { // client disconnected
+                else if (bytes == 0) { // client disconnected
                     server.erase_client(connection.get_fd_());
                 }
                 else {
-                    connection.set_length(bytes);
-                    server.add_epoll(connection.get_fd_(), EPOLLOUT);
+                    connection.set_length(0);
+                    connection.set_offset(0);
+                    server.modify_epoll(connection.get_fd_(), EPOLLOUT);
                 }
             }
             else if (connection.get_event() == EPOLLOUT) {
-                server.delete_epoll(connection.get_fd_(), EPOLLOUT);
-
                 std::string buf_string_write(100, 'a');
+                connection.set_length(BUFSIZE);
                 ssize_t bytes = connection.write(buf_string_write.c_str(), buf_string_write.size());
 
                 if ( (bytes == -1 && errno == EINTR) || bytes < connection.get_length()) {
@@ -55,7 +55,9 @@ int main(int argc, char* argv[]) {
                     server.erase_client(connection.get_fd_());
                 }
                 else {
-                    server.add_epoll(connection.get_fd_(), EPOLLIN);
+                    connection.set_length(0);
+                    connection.set_offset(0);
+                    server.modify_epoll(connection.get_fd_(), EPOLLIN);
                 }
             }
         };
