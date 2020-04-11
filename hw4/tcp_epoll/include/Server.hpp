@@ -14,7 +14,7 @@ namespace Tcp_epoll {
 using Callback = std::function<void(Connection&)>;
 
 constexpr size_t DEFAULT_MAX_CONNECTION_NUMBER = 5;
-constexpr size_t EPOLL_SIZE = 128;
+constexpr size_t EPOLL_SIZE = 2;
 
 class Server {
 public:
@@ -38,7 +38,6 @@ public:
     void close();
 
     void erase_client(int key) { clients_.erase(key); };
-    int get_epoll_fd() { return epoll_fd_; }
 
     void init(const std::string& address, uint16_t port,
             Callback read_from_client_handler, Callback write_to_client_handler);

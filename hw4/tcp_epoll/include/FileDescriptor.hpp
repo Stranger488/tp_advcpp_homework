@@ -1,6 +1,7 @@
 #ifndef FILEDESCRIPTOR_HPP
 #define FILEDESCRIPTOR_HPP
 
+
 namespace Tcp_epoll {
 
 class FileDescriptor {
@@ -20,7 +21,6 @@ public:
 
 private:
     int fd_ = -1;
-
 };
 
 } // namespace Tcp_epoll

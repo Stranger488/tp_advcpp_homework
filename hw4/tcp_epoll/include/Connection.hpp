@@ -4,8 +4,7 @@
 
 #include <string>
 #include <arpa/inet.h>
-#include <vector>
-#include <memory>
+
 #include "FileDescriptor.hpp"
 
 namespace Tcp_epoll {
@@ -31,16 +30,15 @@ public:
 
     int get_fd_() const { return fd_; }
     uint32_t get_event() const { return event_; }
-    size_t get_offset_read() const { return offset_read_; }
-    size_t get_offset_write() const { return offset_write_; }
-    size_t get_offset() const { return offset_; }
-    char* get_buf_data() { return buf_.data(); }
-    const char* get_buf_c_str() { return buf_.c_str(); }
+    std::string& get_buf() { return buf_; }
+    size_t get_offset_read() const;
+    size_t get_offset_write() const;
+    size_t get_last_read_bytes() const;
 
-    void set_offset_read(size_t offset) { offset_read_ = offset ; }
-    void set_offset_write(size_t offset) { offset_write_ = offset ; }
-    void set_offset(size_t offset) { offset_ = offset ; }
-    void set_event(uint32_t event) { event_ = event; }
+    void set_event(uint32_t event);
+    void set_offset_read(size_t offset);
+    void set_offset_write(size_t offset);
+    void set_last_read_bytes(size_t bytes);
 
 private:
     FileDescriptor fd_;
@@ -54,11 +52,10 @@ private:
     bool is_opened_;
 
     uint32_t event_;
-
     std::string buf_;
-    size_t offset_read_;
-    size_t offset_write_;
-    size_t offset_;
+    size_t offset_read_ = 0;
+    size_t offset_write_ = 0;
+    size_t last_read_bytes_ = 0;
 };
 
 } // namespace Tcp_epoll
