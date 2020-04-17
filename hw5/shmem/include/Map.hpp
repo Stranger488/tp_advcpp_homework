@@ -104,6 +104,7 @@ public:
     }
 
     void clear() {
+        SemLock sem_lock = SemLock(sem_);
         map_->clear();
     }
     auto erase(const Key& key) {
