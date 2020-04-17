@@ -107,6 +107,7 @@ void Server::accept_clients() {
         std::string client_addr_string(addr_size, '\0');
         const char* res_addr = inet_ntop(AF_INET, &client_addr.sin_addr, client_addr_string.data(), addr_size);
         if (res_addr == nullptr) {
+            ::close(fd);
             throw std::runtime_error(std::strerror(errno));
         }
 

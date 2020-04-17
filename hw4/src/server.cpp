@@ -55,9 +55,11 @@ int main(int argc, char* argv[]) {
         }
     };
 
+    std::string address = argv[1];
+    uint16_t port = std::stoi(argv[2]);
     while (true) {
         try {
-            server.init(argv[1], std::stoi(argv[2]), read_from_client_handler, write_to_client_handler);
+            server.init(address, port, read_from_client_handler, write_to_client_handler);
             server.event_loop();
         } catch (std::runtime_error& err) {
             std::cout << err.what() << std::endl;
