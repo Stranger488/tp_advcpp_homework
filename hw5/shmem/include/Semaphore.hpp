@@ -28,7 +28,7 @@ public:
     }
 
     void unlock() {
-        if (::sem_post(sem_)) {
+        if (::sem_post(sem_) < 0) {
             throw std::runtime_error(std::strerror(errno));
         }
     }
