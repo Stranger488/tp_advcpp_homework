@@ -31,10 +31,7 @@ ShUniquePtr<U> make_shmem(size_t n) {
     return {reinterpret_cast<U*>(mmap), [n](U* u) { ::munmap(u, sizeof(U) * n); }};
 }
 
-template <
-    class Key,
-    class T
->
+template <class Key, class T>
 class Map {
 public:
     using value_type = std::pair<const Key, T>;
@@ -46,8 +43,8 @@ public:
     Map() {
         mmap_ptr_ = make_shmem<value_type>(MMAP_NUMBER);
 
-        Alloc<value_type>* alloc;
-        alloc = reinterpret_cast<Alloc<value_type>*>(mmap_ptr_.get());
+        AllocState<value_type>* alloc{};
+        alloc = reinterpret_cast<AllocState<value_type>*>(mmap_ptr_.get());
         alloc->start = reinterpret_cast<char*>(mmap_ptr_.get()) + sizeof(*alloc);
         alloc->end = reinterpret_cast<char*>(mmap_ptr_.get()) + sizeof(value_type) * MMAP_NUMBER;
 
