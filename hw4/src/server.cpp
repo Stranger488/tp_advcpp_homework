@@ -11,9 +11,9 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    Tcp_epoll::Server server;
+    tcp_epoll::Server server;
 
-    auto read_from_client_handler = [&server] (Tcp_epoll::Connection& connection) {
+    auto read_from_client_handler = [&server] (tcp_epoll::Connection& connection) {
         auto con_fd = connection.get_fd_();
         auto con_buf_data = connection.get_buf().data();
         auto con_offset_read = connection.get_offset_read();
@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
         }
     };
 
-    auto write_to_client_handler = [&server] (Tcp_epoll::Connection& connection) {
+    auto write_to_client_handler = [&server] (tcp_epoll::Connection& connection) {
         auto con_fd = connection.get_fd_();
         auto con_buf_c_str = connection.get_buf().c_str();
         auto con_offset_write = connection.get_offset_write();

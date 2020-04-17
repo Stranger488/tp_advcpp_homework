@@ -9,7 +9,7 @@
 #include "Connection.hpp"
 #include "FileDescriptor.hpp"
 
-namespace Tcp_epoll {
+namespace tcp_epoll {
 
 using Callback = std::function<void(Connection&)>;
 
@@ -48,13 +48,13 @@ private:
 
     size_t max_connect_ = DEFAULT_MAX_CONNECTION_NUMBER;
     bool is_opened_ = false;
-    std::map<int, Connection> clients_{};
+    std::map<int, Connection> clients_;
 
     Callback read_from_client_handler_;
     Callback write_to_client_handler_;
 };
 
-} // namespace Tcp_epoll
+} // namespace tcp_epoll
 
 
 #endif // SERVER_HPP

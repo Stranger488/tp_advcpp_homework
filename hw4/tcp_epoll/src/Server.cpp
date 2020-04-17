@@ -4,7 +4,7 @@
 
 #include "Server.hpp"
 
-namespace Tcp_epoll {
+namespace tcp_epoll {
 
 void Server::init(const std::string& address, uint16_t port,
         Callback read_from_client_handler, Callback write_to_client_handler) {
@@ -173,4 +173,4 @@ void Server::close() {
     is_opened_ = false;
 }
 
-} // namespace Tcp_epoll
+} // namespace tcp_epoll

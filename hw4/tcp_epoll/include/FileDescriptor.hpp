@@ -2,7 +2,7 @@
 #define FILEDESCRIPTOR_HPP
 
 
-namespace Tcp_epoll {
+namespace tcp_epoll {
 
 class FileDescriptor {
 public:
@@ -23,7 +23,7 @@ private:
     int fd_ = -1;
 };
 
-} // namespace Tcp_epoll
+} // namespace tcp_epoll
 
 
 #endif // FILEDESCRIPTOR_HPP

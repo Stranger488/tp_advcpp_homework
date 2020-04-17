@@ -2,7 +2,7 @@
 
 #include "FileDescriptor.hpp"
 
-namespace Tcp_epoll {
+namespace tcp_epoll {
 
 FileDescriptor::FileDescriptor(int fd) : fd_(fd) { }
 
@@ -39,5 +39,5 @@ int FileDescriptor::extract() {
     return temp_fd;
 }
 
-} // namespace Tcp_epoll
+} // namespace tcp_epoll
 

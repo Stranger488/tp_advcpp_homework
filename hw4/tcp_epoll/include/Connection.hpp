@@ -7,7 +7,7 @@
 
 #include "FileDescriptor.hpp"
 
-namespace Tcp_epoll {
+namespace tcp_epoll {
 
 constexpr size_t BUFSIZE = 1024;
 
@@ -58,7 +58,7 @@ private:
     size_t last_read_bytes_ = 0;
 };
 
-} // namespace Tcp_epoll
+} // namespace tcp_epoll
 
 
 #endif // CONNECTION_HPP

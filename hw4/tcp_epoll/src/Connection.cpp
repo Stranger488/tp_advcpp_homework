@@ -7,7 +7,7 @@
 
 #include "Connection.hpp"
 
-namespace Tcp_epoll {
+namespace tcp_epoll {
 
 Connection::Connection(const std::string& address, uint16_t port)
         : dst_addr_(address), dst_port_(port), buf_(BUFSIZE, '\0') {
@@ -124,4 +124,4 @@ void Connection::set_offset_read(size_t offset) { offset_read_ = offset; }
 void Connection::set_offset_write(size_t offset) { offset_write_ = offset; }
 void Connection::set_last_read_bytes(size_t bytes) { last_read_bytes_ = bytes; }
 
-} // namespace Tcp_epoll
+} // namespace tcp_epoll
