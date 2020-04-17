@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <cstring>
 
-namespace Shmem {
+namespace shmem {
 
 class Semaphore {
 public:
@@ -61,7 +61,7 @@ private:
     Semaphore& sem_lock_;
 };
 
-} // namespace Shmem
+} // namespace shmem
 
 
 #endif // SEMAPHORE_HPP

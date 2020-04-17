@@ -4,7 +4,7 @@ project(hw5)
 add_compile_options(-O3)
 set(CMAKE_CXX_STANDARD 17)
 
-set(LOG_LIB_SRCS shmem/src/ShmemAlloc.cpp shmem/src/Semaphore.cpp shmem/src/Map.cpp)
+set(LOG_LIB_SRCS shmem/src/ShMemAlloc.cpp shmem/src/Semaphore.cpp shmem/src/Map.cpp)
 set(SRCS src/main.cpp)
 
 add_library(shmem STATIC ${LOG_LIB_SRCS})

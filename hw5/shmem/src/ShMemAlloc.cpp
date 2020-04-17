@@ -1,4 +1,4 @@
-#include "Semaphore.hpp"
+#include "ShMemAlloc.hpp"
 
 namespace shmem {
 

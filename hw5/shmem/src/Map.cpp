@@ -1,7 +1,7 @@
 #include "Map.hpp"
 
-namespace Shmem {
+namespace shmem {
 
 
 
-} // namespace Shmem
+} // namespace shmem

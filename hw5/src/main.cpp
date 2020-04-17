@@ -5,21 +5,21 @@
 #include "Map.hpp"
 
 int main() {
-    Shmem::Map<int, std::basic_string<char, std::char_traits<char>>> map{};
+    shmem::Map< int, std::basic_string<char, std::char_traits<char>> > map{};
 
     int pid = fork();
     if (pid < 0) {
         throw std::runtime_error(strerror(errno));
     }
     else if (pid != 0) { // parent
-        map.insert({1, "1"});
-        map.insert({3, "3"});
-        map.insert({5, "5"});
+        map.insert({1, "one"});
+        map.insert({3, "three"});
+        map.insert({5, "five"});
     }
     else { // child
-        map.insert({2, "2"});
-        map.insert({4, "4"});
-        map.insert({6, "6"});
+        map.insert({2, "two"});
+        map.insert({4, "four"});
+        map.insert({6, "six"});
 
         return 0;
     }

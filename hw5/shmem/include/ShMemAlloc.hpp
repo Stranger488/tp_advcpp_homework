@@ -5,7 +5,7 @@
 #include <new>
 #include <cstring>
 
-namespace Shmem {
+namespace shmem {
 
 template<typename T>
 struct Alloc {
@@ -14,29 +14,26 @@ struct Alloc {
 };
 
 template<typename T>
-struct ShmemAlloc {
+struct ShMemAlloc {
 public:
     using value_type = T;
 
-    template <class U>
-    struct rebind { typedef ShmemAlloc<U> other; };
-
-    ShmemAlloc(Alloc<value_type>* other) {
+    ShMemAlloc(Alloc<value_type>* other) {
         alloc_ = other;
     }
 
-    ShmemAlloc(const ShmemAlloc<value_type>& other) {
+    ShMemAlloc(const ShMemAlloc<value_type>& other) {
         alloc_ = other.alloc_;
     }
 
     template <typename U>
-    ShmemAlloc(const ShmemAlloc<U>& alloc) {
-        alloc_ = reinterpret_cast<Alloc<value_type>*>(alloc.alloc_);
+    ShMemAlloc(const ShMemAlloc<U>& other) {
+        alloc_ = reinterpret_cast<Alloc<value_type>*>(other.alloc_);
     }
 
     value_type* allocate(std::size_t n) {
         if (alloc_->start + sizeof(value_type) * n > alloc_->end) {
-            throw std::bad_alloc{};
+            throw std::bad_alloc();
         }
         alloc_->start += sizeof(value_type) * n;
 
@@ -49,21 +46,21 @@ public:
         }
     }
 
-
+public:
     Alloc<value_type>* alloc_{};
 };
 
 template <class T, class U>
-bool operator==(const ShmemAlloc<T>& left, const ShmemAlloc<U>& right) {
+bool operator==(const ShMemAlloc<T>& left, const ShMemAlloc<U>& right) {
     return left == right;
 }
 
 template <class T, class U>
-bool operator!=(const ShmemAlloc<T>& left, const ShmemAlloc<U>& right)  {
+bool operator!=(const ShMemAlloc<T>& left, const ShMemAlloc<U>& right)  {
     return left != right;
 }
 
-} // namespace Shmem
+} // namespace shmem
 
 
 #endif // SHMEMALLOC_HPP
