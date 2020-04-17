@@ -10,6 +10,7 @@ set(SRCS src/main.cpp)
 add_library(shmem STATIC ${LOG_LIB_SRCS})
 
 target_include_directories(shmem PUBLIC shmem/include)
+find_package(Threads)
 
 add_executable(hw5 ${SRCS})
-target_link_libraries(hw5 shmem)
+target_link_libraries(hw5 shmem ${CMAKE_THREAD_LIBS_INIT})

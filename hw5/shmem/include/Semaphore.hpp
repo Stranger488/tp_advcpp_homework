@@ -10,7 +10,11 @@ namespace Shmem {
 
 class Semaphore {
 public:
-    explicit Semaphore(sem_t* ptr) {
+    Semaphore() {
+        sem_ = nullptr;
+    }
+
+    Semaphore(sem_t* ptr) {
         sem_ = ptr;
 
         if (::sem_init(sem_, 1, 1) < 0) {
@@ -18,7 +22,9 @@ public:
         }
     }
     ~Semaphore() noexcept {
-        ::sem_post(sem_);
+        if (sem_) {
+            ::sem_destroy(sem_);
+        }
     }
 
     void lock() {
@@ -33,13 +39,17 @@ public:
         }
     }
 
+    const sem_t* get() const {
+        return sem_;
+    }
+
 private:
-    sem_t* sem_;
+    sem_t* sem_{};
 };
 
 class SemLock {
 public:
-    explicit SemLock(Semaphore& sem) : sem_lock_(sem) {
+    SemLock(Semaphore& sem) : sem_lock_(sem) {
         sem_lock_.lock();
     }
 

@@ -15,23 +15,26 @@
 
 namespace Shmem {
 
-constexpr size_t mmap_number = 4;
+constexpr size_t mmap_number = 512;
 
-template<typename T>
-using ShUniquePtr = std::unique_ptr<T, std::function<void(T*)>>;
+template<typename U>
+using ShUniquePtr = std::unique_ptr<U, std::function<void(U*)>>;
 
-template<typename T>
-ShUniquePtr<T> make_shmem(size_t n) {
-    void* mmap = ::mmap(nullptr, sizeof(T) * n,
+template<typename U>
+ShUniquePtr<U> make_shmem(size_t n) {
+    void* mmap = ::mmap(nullptr, sizeof(U) * n,
                         PROT_WRITE | PROT_READ,
                         MAP_SHARED | MAP_ANONYMOUS, -1, 0);
     if (mmap == MAP_FAILED)
         throw std::runtime_error(strerror(errno));
 
-    return {reinterpret_cast<T*>(mmap), [n](T* t) { ::munmap(t, sizeof(T) * n); }};
+    return {reinterpret_cast<U*>(mmap), [n](U* t) { ::munmap(t, sizeof(U) * n); }};
 }
 
-template <class Key, class T>
+template <
+    class Key,
+    class T
+>
 class Map {
 public:
     using value_type = std::pair<const Key, T>;
@@ -41,19 +44,45 @@ public:
     using iterator = typename Shmap::iterator;
 
     Map() {
-        ShUniquePtr<value_type> mmap = make_shmem<value_type>();
+        mmap_ptr_ = make_shmem<value_type>(mmap_number);
 
-        auto* state = static_cast<AllocState*>(mmap.get());
-        state->start = static_cast<char*>(mmap) + sizeof(*state);
-        state->end = static_cast<char*>(mmap) + sizeof(T) * mmap_number;
+        /*
+        void* mmap = ::mmap(nullptr, sizeof(value_type) * mmap_number,
+                            PROT_WRITE | PROT_READ,
+                            MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+        if (mmap == MAP_FAILED) {
+            throw std::runtime_error(strerror(errno));
+        }
 
-        auto* semaphore = reinterpret_cast<sem_t*>(state->start);
-        sem_ = Semaphore(semaphore);
+        mmap_ = mmap;
 
-        auto* map = reinterpret_cast<Shmap*>(state->start);
-        state->start = static_cast<char*>(state->start) + sizeof(Shmap);
+        alloc = static_cast<Alloc<value_type>*>(mmap);
+        alloc->start = static_cast<char*>(mmap_) + sizeof(*alloc);
+        alloc->end = static_cast<char*>(mmap_) + sizeof(value_type) * mmap_number;
 
-        ShmemMapAllocator shmem_alloc(state);
+        sem_ = Semaphore(reinterpret_cast<sem_t*>(alloc->start));
+        alloc->start = static_cast<char*>(alloc->start) + sizeof(*(sem_.get()));
+
+        Shmap* map = reinterpret_cast<Shmap*>(alloc->start);
+
+        alloc->start = static_cast<char*>(alloc->start) + sizeof(Shmap);
+
+        ShmemMapAllocator shalloc(alloc);
+        map_ = new (map) Shmap{shalloc};
+         */
+
+
+        alloc = reinterpret_cast<Alloc<value_type>*>(mmap_ptr_.get());
+        alloc->start = reinterpret_cast<char*>(mmap_ptr_.get()) + sizeof(*alloc);
+        alloc->end = reinterpret_cast<char*>(mmap_ptr_.get()) + sizeof(value_type) * mmap_number;
+
+        sem_ = Semaphore(reinterpret_cast<sem_t*>(alloc->start));
+        alloc->start = static_cast<char*>(alloc->start) + sizeof(*sem_.get());
+
+        auto* map = reinterpret_cast<Shmap*>(alloc->start);
+        alloc->start = static_cast<char*>(alloc->start) + sizeof(Shmap);
+
+        ShmemMapAllocator shmem_alloc(alloc);
         map_ = new (map) Shmap{shmem_alloc};
     }
 
@@ -65,7 +94,6 @@ public:
         SemLock sem_lock = SemLock(sem_);
         return map_->at(key);
     }
-
     const T& at(const Key& key) const {
         SemLock sem_lock = SemLock(sem_);
         return map_->at(key);
@@ -75,7 +103,6 @@ public:
         SemLock sem_lock = SemLock(sem_);
         return map_->operator[](key);
     }
-
     T& operator[](Key&& key) {
         SemLock sem_lock = SemLock(sem_);
         return map_->operator[](std::move(key));
@@ -84,7 +111,6 @@ public:
     auto begin() {
         return map_->begin();
     }
-
     auto cbegin() const {
         return map_->cbegin();
     }
@@ -92,7 +118,6 @@ public:
     auto end() {
         return map_->end();
     }
-
     auto cend() const {
         return map_->cend();
     }
@@ -100,17 +125,14 @@ public:
     void clear() {
         map_->clear();
     }
-
     auto insert(const value_type & value) {
         SemLock sem_lock = SemLock(sem_);
         return map_->insert(value);
     }
-
     auto erase(const Key& key) {
         SemLock sem_lock = SemLock(sem_);
         return map_->erase(key);
     }
-
     auto erase(iterator position) {
         SemLock sem_lock = SemLock(sem_);
         return map_->erase(position);
@@ -118,7 +140,12 @@ public:
 
 private:
     Semaphore sem_;
-    std::map<Key, T, ShmemMapAllocator>* map_;
+    ShUniquePtr<value_type> mmap_ptr_;
+
+//    void* mmap_;
+    Alloc<value_type>* alloc;
+
+    Shmap* map_;
 };
 
 } // namespace Shmem

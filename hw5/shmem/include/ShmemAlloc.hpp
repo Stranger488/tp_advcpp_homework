@@ -7,41 +7,61 @@
 
 namespace Shmem {
 
-struct AllocState {
-    char *start;
-    char *end;
+template<typename T>
+struct Alloc {
+    char* start;
+    char* end;
 };
 
 template<typename T>
 struct ShmemAlloc {
-    explicit ShmemAlloc(AllocState* state) {
-        state_ = state;
+public:
+    using value_type = T;
+
+    template <class U>
+    struct rebind { typedef ShmemAlloc<U> other; };
+
+    ShmemAlloc(Alloc<value_type>* other) {
+        alloc_ = other;
     }
 
-    ShmemAlloc(const ShmemAlloc& other) noexcept {
-        state_ = other.state_;
+    ShmemAlloc(const ShmemAlloc<value_type>& other) {
+        alloc_ = other.alloc_;
     }
 
-    T* allocate(std::size_t n) {
-        char* res = state_->start;
+    template <typename U>
+    ShmemAlloc(const ShmemAlloc<U>& alloc) {
+        alloc_ = reinterpret_cast<Alloc<value_type>*>(alloc.alloc_);
+    }
 
-        if (res + sizeof(T) * n > state_->end) {
+    value_type* allocate(std::size_t n) {
+        if (alloc_->start + sizeof(value_type) * n > alloc_->end) {
             throw std::bad_alloc{};
         }
-        state_->start += sizeof(T) * n;
+        alloc_->start += sizeof(value_type) * n;
 
-        return reinterpret_cast<T*>(res);
+        return reinterpret_cast<value_type*>(alloc_->start);
     }
 
-    void deallocate(T* p, std::size_t n) noexcept {
-        if (state_->start - n * sizeof(T) == reinterpret_cast<char*>(p)) {
-            state_->start -= n * sizeof(T);
+    void deallocate(value_type* p, std::size_t n) noexcept {
+        if (alloc_->start - n * sizeof(value_type) == reinterpret_cast<char*>(p)) {
+            alloc_->start -= n * sizeof(value_type);
         }
     }
 
-private:
-    AllocState *state_;
+
+    Alloc<value_type>* alloc_{};
 };
+
+template <class T, class U>
+bool operator==(const ShmemAlloc<T>& left, const ShmemAlloc<U>& right) {
+    return left == right;
+}
+
+template <class T, class U>
+bool operator!=(const ShmemAlloc<T>& left, const ShmemAlloc<U>& right)  {
+    return left != right;
+}
 
 } // namespace Shmem
 
