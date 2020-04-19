@@ -15,8 +15,6 @@
 
 namespace shmem {
 
-constexpr size_t MMAP_NUMBER = 1024;
-
 template<typename U>
 using ShUniquePtr = std::unique_ptr<U, std::function<void(U*)>>;
 
@@ -40,13 +38,13 @@ public:
     using ShMap = std::map<Key, T, comparator, ShMapAllocator>;
     using iterator = typename ShMap::iterator;
 
-    Map() {
-        mmap_ptr_ = make_shmem<value_type>(MMAP_NUMBER);
+    Map(size_t mmap_number) {
+        mmap_ptr_ = make_shmem<value_type>(mmap_number);
 
         AllocState<value_type>* alloc{};
         alloc = reinterpret_cast<AllocState<value_type>*>(mmap_ptr_.get());
         alloc->start = reinterpret_cast<char*>(mmap_ptr_.get()) + sizeof(*alloc);
-        alloc->end = reinterpret_cast<char*>(mmap_ptr_.get()) + sizeof(value_type) * MMAP_NUMBER;
+        alloc->end = reinterpret_cast<char*>(mmap_ptr_.get()) + sizeof(value_type) * mmap_number;
 
         sem_ = Semaphore(reinterpret_cast<sem_t*>(alloc->start));
         alloc->start = static_cast<char*>(alloc->start) + sizeof(*sem_.get());

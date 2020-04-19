@@ -4,8 +4,10 @@
 
 #include "Map.hpp"
 
+constexpr size_t MMAP_NUMBER = 1024;
+
 int main() {
-    shmem::Map< int, std::basic_string<char, std::char_traits<char>> > map{};
+    shmem::Map< int, std::basic_string<char, std::char_traits<char>> > map(MMAP_NUMBER);
 
     int pid = fork();
     if (pid < 0) {
