@@ -7,7 +7,6 @@
 
 namespace shmem {
 
-template<typename T>
 struct AllocState {
     char* start;
     char* end;
@@ -18,7 +17,7 @@ struct ShMemAlloc {
 public:
     using value_type = T;
 
-    ShMemAlloc(AllocState<value_type>* other) {
+    ShMemAlloc(AllocState* other) {
         alloc_ = other;
     }
 
@@ -28,7 +27,7 @@ public:
 
     template <typename U>
     ShMemAlloc(const ShMemAlloc<U>& other) {
-        alloc_ = reinterpret_cast<AllocState<value_type>*>(other.alloc_);
+        alloc_ = reinterpret_cast<AllocState*>(other.alloc_);
     }
 
     value_type* allocate(std::size_t n) {
@@ -47,17 +46,17 @@ public:
     }
 
 public:
-    AllocState<value_type>* alloc_{};
+    AllocState* alloc_{};
 };
 
 template <class T, class U>
 bool operator==(const ShMemAlloc<T>& left, const ShMemAlloc<U>& right) {
-    return left == right;
+    return left.alloc_ == right.alloc_;
 }
 
 template <class T, class U>
 bool operator!=(const ShMemAlloc<T>& left, const ShMemAlloc<U>& right)  {
-    return left != right;
+    return left.alloc_ != right.alloc_;
 }
 
 } // namespace shmem

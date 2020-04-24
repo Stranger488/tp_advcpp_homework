@@ -39,12 +39,16 @@ public:
     using iterator = typename ShMap::iterator;
 
     Map(size_t mmap_number) {
-        mmap_ptr_ = make_shmem<value_type>(mmap_number);
+        mmap_ptr_ = make_shmem<char>(mmap_number);
 
-        AllocState<value_type>* alloc{};
-        alloc = reinterpret_cast<AllocState<value_type>*>(mmap_ptr_.get());
+        AllocState* alloc{};
+        alloc = reinterpret_cast<AllocState*>(mmap_ptr_.get());
         alloc->start = reinterpret_cast<char*>(mmap_ptr_.get()) + sizeof(*alloc);
         alloc->end = reinterpret_cast<char*>(mmap_ptr_.get()) + sizeof(value_type) * mmap_number;
+
+//        auto* sem = reinterpret_cast<sem_t*>(alloc->start);
+//        sem_ = new (sem) Semaphore();
+//        alloc->start = static_cast<char*>(alloc->start) + sizeof(sem_t*);
 
         sem_ = Semaphore(reinterpret_cast<sem_t*>(alloc->start));
         alloc->start = static_cast<char*>(alloc->start) + sizeof(*sem_.get());
@@ -60,21 +64,21 @@ public:
         map_->~map();
     }
 
-    T& at(const Key& key) {
-        SemLock sem_lock = SemLock(sem_);
+    T at(const Key& key) {
+        auto sem_lock = SemLock(sem_);
         return map_->at(key);
     }
     const T& at(const Key& key) const {
-        SemLock sem_lock = SemLock(sem_);
+        auto sem_lock = SemLock(sem_);
         return map_->at(key);
     }
 
     T& operator[](const Key& key) {
-        SemLock sem_lock = SemLock(sem_);
+        auto sem_lock = SemLock(sem_);
         return map_->operator[](key);
     }
     T& operator[](Key&& key) {
-        SemLock sem_lock = SemLock(sem_);
+        auto sem_lock = SemLock(sem_);
         return map_->operator[](std::move(key));
     }
 
@@ -116,7 +120,7 @@ public:
 
 private:
     Semaphore sem_;
-    ShUniquePtr<value_type> mmap_ptr_;
+    ShUniquePtr<char> mmap_ptr_;
     ShMap* map_;
 };
 
