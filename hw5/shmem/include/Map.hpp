@@ -39,7 +39,7 @@ public:
     using iterator = typename ShMap::iterator;
 
     Map(size_t mmap_number) {
-        mmap_ptr_ = make_shmem<char>(mmap_number);
+        mmap_ptr_ = make_shmem<char>(sizeof(value_type) * mmap_number);
 
         AllocState* alloc{};
         alloc = reinterpret_cast<AllocState*>(mmap_ptr_.get());
@@ -68,18 +68,10 @@ public:
         auto sem_lock = SemLock(sem_);
         return map_->at(key);
     }
-    const T& at(const Key& key) const {
-        auto sem_lock = SemLock(sem_);
-        return map_->at(key);
-    }
 
-    T& operator[](const Key& key) {
+    T operator[](const Key& key) {
         auto sem_lock = SemLock(sem_);
         return map_->operator[](key);
-    }
-    T& operator[](Key&& key) {
-        auto sem_lock = SemLock(sem_);
-        return map_->operator[](std::move(key));
     }
 
     auto begin() {

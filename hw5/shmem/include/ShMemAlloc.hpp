@@ -21,13 +21,9 @@ public:
         alloc_ = other;
     }
 
-    ShMemAlloc(const ShMemAlloc<value_type>& other) {
-        alloc_ = other.alloc_;
-    }
-
     template <typename U>
     ShMemAlloc(const ShMemAlloc<U>& other) {
-        alloc_ = reinterpret_cast<AllocState*>(other.alloc_);
+        alloc_ = other.alloc_;
     }
 
     value_type* allocate(std::size_t n) {
