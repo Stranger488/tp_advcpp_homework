@@ -72,7 +72,7 @@ public:
         map_->~map();
     }
 
-    auto convert(ShStrType& shstr) {
+    auto convert(const ShStrType& shstr) {
         return std::string(shstr);
     }
     auto convert(const std::string& str) {
