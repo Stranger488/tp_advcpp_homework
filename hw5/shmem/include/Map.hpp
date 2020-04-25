@@ -32,14 +32,24 @@ ShUniquePtr<U> make_shmem(size_t n) {
 template <class Key, class T>
 class Map {
 public:
+    using ShStrAllocator = ShMemAlloc<char>;
+    using ShStrType = std::basic_string<char, std::char_traits<char>, ShStrAllocator>;
+
+    using MapKey = std::conditional_t<std::is_same_v<Key, std::string>,
+            ShStrType, Key>;
+    using MapT = std::conditional_t<std::is_same_v<T, std::string>,
+            ShStrType, T>;
+
     using value_type = std::pair<const Key, T>;
-    using comparator = std::less<Key>;
-    using ShMapAllocator = ShMemAlloc<value_type>;
-    using ShMap = std::map<Key, T, comparator, ShMapAllocator>;
+    using map_value_type = std::pair<const MapKey, MapT>;
+
+    using comparator = std::less<MapKey>;
+    using ShMapAllocator = ShMemAlloc<map_value_type>;
+    using ShMap = std::map<MapKey, MapT, comparator, ShMapAllocator>;
     using iterator = typename ShMap::iterator;
 
     Map(size_t mmap_number) {
-        size_t n = sizeof(value_type) * mmap_number;
+        size_t n = sizeof(map_value_type) * mmap_number;
         mmap_ptr_ = make_shmem<char>(n);
 
         AllocState* alloc{};
@@ -62,42 +72,54 @@ public:
         map_->~map();
     }
 
-    T at(const Key& key) {
-        auto sem_lock = SemLock(sem_);
-        return map_->at(key);
+    auto convert(ShStrType& shstr) {
+        return std::string(shstr);
+    }
+    auto convert(const std::string& str) {
+        return ShStrType{str, map_->get_allocator()};
+    }
+    template<typename P>
+    auto convert(P p) {
+        return p;
     }
 
-    T operator[](const Key& key) {
+    auto at(const Key& key) {
         auto sem_lock = SemLock(sem_);
-        return map_->operator[](key);
+        return map_->at(convert(key));
     }
 
-    T& operator[](Key&& key) {
+    auto operator[](const Key& key) {
         auto sem_lock = SemLock(sem_);
-        return map_->operator[](std::move(key));
+        return map_->operator[](convert(key));
     }
 
+    auto& operator[](Key&& key) {
+        auto sem_lock = SemLock(sem_);
+        return map_->operator[](std::move(convert(key)));
+    }
     auto begin() {
         return map_->begin();
     }
+
     auto cbegin() const {
         return map_->cbegin();
     }
-
     auto end() {
         return map_->end();
     }
+
     auto cend() const {
         return map_->cend();
     }
 
     auto insert(const value_type& value) {
         SemLock sem_lock = SemLock(sem_);
-        return map_->insert(value);
+        return map_->insert({convert(value.first), convert(value.second)});
     }
+
     auto insert(typename ShMap::const_iterator hint, const value_type& value) {
         SemLock sem_lock = SemLock(sem_);
-        return map_->insert(hint, value);
+        return map_->insert(hint, {convert(value.first), convert(value.second)});
     }
 
     void clear() {
@@ -106,7 +128,7 @@ public:
     }
     auto erase(const Key& key) {
         SemLock sem_lock = SemLock(sem_);
-        return map_->erase(key);
+        return map_->erase(convert(key));
     }
     auto erase(iterator position) {
         SemLock sem_lock = SemLock(sem_);
