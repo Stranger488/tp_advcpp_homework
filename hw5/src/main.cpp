@@ -29,9 +29,11 @@ int main() {
     int status = 0;
     wait(&status);
 
-    for (auto& every : map) {
-        std::cout << every.first << " " << every.second << std::endl;
+    for (size_t i = 1; i < 7; i++) {
+        std::cout << map.at(i) << std::endl;
     }
+
+    map.destroy();
 
     return 0;
 }

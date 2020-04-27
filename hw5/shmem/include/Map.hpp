@@ -69,6 +69,11 @@ public:
     }
 
     ~Map() {
+
+    }
+
+    void destroy() {
+        sem_->destroy();
         map_->~map();
     }
 
@@ -93,23 +98,9 @@ public:
         return map_->operator[](convert(key));
     }
 
-    auto& operator[](Key&& key) {
+    auto operator[](Key&& key) {
         auto sem_lock = SemLock(sem_);
         return map_->operator[](std::move(convert(key)));
-    }
-    auto begin() {
-        return map_->begin();
-    }
-
-    auto cbegin() const {
-        return map_->cbegin();
-    }
-    auto end() {
-        return map_->end();
-    }
-
-    auto cend() const {
-        return map_->cend();
     }
 
     auto insert(const value_type& value) {

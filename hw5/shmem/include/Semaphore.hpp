@@ -16,6 +16,10 @@ public:
         }
     }
     ~Semaphore() noexcept {
+
+    }
+
+    void destroy() {
         ::sem_destroy(&sem_);
     }
 
