@@ -14,12 +14,12 @@ int main() {
         throw std::runtime_error(strerror(errno));
     }
     else if (pid != 0) { // parent
-        map.insert( {1, "one"} );
+        map.insert( {1, std::string(100, 'a')} );
         map.insert({3, "three"});
         map.insert({5, "five"});
     }
     else { // child
-        map.insert( {2, "two"} );
+        map.insert( {2, std::string(100, 'b')} );
         map.insert({4, "four"});
         map.insert({6, "six"});
 

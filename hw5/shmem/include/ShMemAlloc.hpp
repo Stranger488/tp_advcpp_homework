@@ -30,9 +30,10 @@ public:
         if (alloc_->start + sizeof(value_type) * n > alloc_->end) {
             throw std::bad_alloc();
         }
+        char* temp_start = alloc_->start;
         alloc_->start += sizeof(value_type) * n;
 
-        return reinterpret_cast<value_type*>(alloc_->start);
+        return reinterpret_cast<value_type*>(temp_start);
     }
 
     void deallocate(value_type* p, std::size_t n) noexcept {
